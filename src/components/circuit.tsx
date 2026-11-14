@@ -125,12 +125,12 @@ export function Circuit({
   const svg = useRef<SVGSVGElement>(null);
   const ink = (color: string) =>
     ({
-      [COLORS[0]]: "#cc8c48",
-      [COLORS[1]]: "#4d9a79",
-      [COLORS[2]]: "#548db8",
-      [COLORS[3]]: "#a578b2",
-      [COLORS[4]]: "#b59a38",
-      [COLORS[5]]: "#5f707a",
+      [COLORS[0]]: "var(--wire-orange)",
+      [COLORS[1]]: "var(--wire-green)",
+      [COLORS[2]]: "var(--wire-blue)",
+      [COLORS[3]]: "var(--wire-purple)",
+      [COLORS[4]]: "var(--wire-yellow)",
+      [COLORS[5]]: "var(--wire-ground)",
     })[color] || color;
   const [search, setSearch] = useState("");
   const [placement, setPlacement] = useState<PaletteKind | null>(null);
@@ -1073,7 +1073,7 @@ export function Circuit({
               height="16"
               patternUnits="userSpaceOnUse"
             >
-              <circle cx="1" cy="1" r=".65" fill="#394056" />
+              <circle cx="1" cy="1" r=".65" fill="var(--grid)" />
             </pattern>
             <linearGradient id="uno-pcb" x2="1" y2="1">
               <stop stopColor="#317ba1" />
@@ -1210,48 +1210,7 @@ export function Circuit({
             <text x="261" y="92" fill="#b7c5a6" fontSize="8">
               L · D13
             </text>
-            {Array.from({ length: 14 }, (_, i) => (
-              <text
-                key={i}
-                x={18 + i * 20}
-                y="31"
-                textAnchor="middle"
-                fill={selected === 13 - i ? "#f5bc82" : "#c1cbb1"}
-                fontSize="8"
-              >
-                {13 - i}
-              </text>
-            ))}
-            <text
-              x="50"
-              y="214"
-              textAnchor="middle"
-              fill="#b8c6a9"
-              fontSize="8"
-            >
-              GND
-            </text>
-            <text
-              x="90"
-              y="214"
-              textAnchor="middle"
-              fill="#e4b68b"
-              fontSize="8"
-            >
-              5V
-            </text>
-            {Array.from({ length: 6 }, (_, i) => (
-              <text
-                key={i}
-                x={168 + i * 20}
-                y="214"
-                textAnchor="middle"
-                fill="#b8c6a9"
-                fontSize="8"
-              >
-                A{i}
-              </text>
-            ))}
+
           </g>
           {display.breadboards.map((board) => (
             <g key={board.id}>
@@ -1452,12 +1411,10 @@ export function Circuit({
                   {(lcdLines?.[row] || " ".repeat(16)).padEnd(16)}
                 </text>
               ))}
-              <text x="12" y="118" fill="white" fontSize="8">
+              <text x="12" y="110" fill="white" fontSize="8">
                 LCD 1602 · 4-BIT
               </text>
-              <text x="125" y="118" fill="#d7ecdf" fontSize="7">
-                CONTRAST / BACKLIGHT FIXED
-              </text>
+
             </g>
           )}
           {display.wires.map((w) => {
@@ -1506,14 +1463,15 @@ export function Circuit({
                 <path
                   d={path}
                   fill="none"
-                  stroke={isSelected ? "#bad8ef" : "#ffffff"}
-                  strokeWidth={isSelected ? 8 : 5}
+                  stroke={isSelected ? "var(--primary)" : "var(--wire-outline)"}
+                  strokeWidth={isSelected ? 5.5 : 4.5}
+                  pointerEvents="none"
                 />
                 <path
                   d={path}
                   fill="none"
                   stroke={ink(w.color)}
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                 />
                 <path
                   d={path}
@@ -1542,6 +1500,58 @@ export function Circuit({
               </g>
             );
           })}
+          <g
+            transform={`translate(${display.uno.x} ${display.uno.y})`}
+            className="uno-pin-labels"
+            pointerEvents="none"
+          >
+            {Array.from({ length: 14 }, (_, i) => (
+              <text
+                key={i}
+                x={18 + i * 20}
+                y="31"
+                textAnchor="middle"
+                fill={selected === 13 - i ? "#ffe0a8" : "#f4f8ff"}
+                fontSize="9"
+                fontWeight="600"
+              >
+                {13 - i}
+              </text>
+            ))}
+            <text
+              x="50"
+              y="214"
+              textAnchor="middle"
+              fill="#f4f8ff"
+              fontSize="9"
+              fontWeight="600"
+            >
+              GND
+            </text>
+            <text
+              x="90"
+              y="214"
+              textAnchor="middle"
+              fill="#ffe0a8"
+              fontSize="9"
+              fontWeight="600"
+            >
+              5V
+            </text>
+            {Array.from({ length: 6 }, (_, i) => (
+              <text
+                key={i}
+                x={168 + i * 20}
+                y="214"
+                textAnchor="middle"
+                fill="#f4f8ff"
+                fontSize="9"
+                fontWeight="600"
+              >
+                A{i}
+              </text>
+            ))}
+          </g>
           {ends
             .filter((t) => t.id.startsWith("lcd:"))
             .map((t) => (
@@ -1549,10 +1559,14 @@ export function Circuit({
                 {terminalNode(t.id, t, t.label)}
                 <text
                   x={t.x}
-                  y={t.y + 14}
+                  y={t.y - 10}
                   textAnchor="middle"
                   fontSize="8"
-                  fill="#52616d"
+                  fill="#f1fff7"
+                  stroke="#26785c"
+                  strokeWidth="2.5"
+                  paintOrder="stroke"
+                  fontWeight="600"
                   pointerEvents="none"
                 >
                   {t.id.slice(4)}
@@ -1820,7 +1834,7 @@ export function Circuit({
                     y={part.kind === "led" ? -43 : -25}
                     textAnchor="middle"
                     className="part-id"
-                    style={{ fill: part.mounts[0] ? "#415368" : "#a6accd" }}
+                    style={{ fill: part.mounts[0] ? "#415368" : "var(--free-part-label)" }}
                   >
                     {part.label || part.id}
                     {part.kind === "resistor"
@@ -1874,7 +1888,7 @@ export function Circuit({
       </div>
       {!editingLocked && !propertiesHidden && (validSelection || pending) && (
         <div
-          className="builder-inspector"
+          className={`builder-inspector ${chosenPart || chosenWire || pending ? "" : "selection-toolbar"}`}
           role="region"
           aria-label="Component properties"
         >
@@ -1928,21 +1942,6 @@ export function Circuit({
                 {endMap.get(chosenWire.to)?.label}
               </span>
             )}
-            {validSelection &&
-              (selection?.kind === "breadboard" ||
-                selection?.kind === "uno") && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    onComponent(
-                      selection.kind === "breadboard" ? "breadboard" : "board",
-                    )
-                  }
-                >
-                  How it connects
-                </Button>
-              )}
             {!validSelection && (
               <span>Select a component or wire to edit it.</span>
             )}
@@ -2026,7 +2025,9 @@ export function Circuit({
               </>
             )}
             {chosenWire && (
-              <>
+              <details className="wire-edit-options">
+                <summary>Edit wire</summary>
+                <div className="wire-edit-actions">
                 <Button
                   variant="outline"
                   size="sm"
@@ -2114,7 +2115,8 @@ export function Circuit({
                 >
                   ↓
                 </Button>
-              </>
+                </div>
+              </details>
             )}
             {validSelection && selection?.kind !== "uno" && (
               <Button

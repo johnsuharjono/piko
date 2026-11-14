@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { LESSONS, lessonSteps } from "../learning/lessons";
 import { createProject } from "../projects/store";
 import { SiteHeader } from "./home";
@@ -46,14 +46,14 @@ export function ProjectIntro({ id }: { id: string }) {
             <div className="intro-tags">
               <span>{lesson.duration}</span>
               <span>Arduino Uno</span>
-              <span>Guided experiment</span>
+              <span>Project walkthrough</span>
             </div>
             <div className="hero-actions">
               <Button onClick={() => start(true)}>
-                Start building <ArrowRight size={16} />
+                Open bench & guide <ArrowRight size={16} />
               </Button>
               <Button variant="outline" onClick={() => start(false)}>
-                Open working example
+                Open example only
               </Button>
             </div>
             {error && <p role="alert">{error}</p>}
@@ -78,7 +78,7 @@ export function ProjectIntro({ id }: { id: string }) {
               {id === "counter"
                 ? "Connect two inputs and a display. Count once per press, reset the result, and inspect the signals alongside your code."
                 : id === "blink"
-                  ? "Complete an LED circuit on a breadboard. Make the light blink, then control its timing."
+                  ? "Explore a working LED circuit on a breadboard, understand the sketch, then change its timing."
                   : id === "button"
                     ? "Make an LED respond to a physical button. Discover why a pressed button can read LOW."
                     : "Send a greeting and a changing value to an LCD. Follow power rails and the signals that carry your text."}
@@ -97,20 +97,14 @@ export function ProjectIntro({ id }: { id: string }) {
             </p>
           </div>
           <div>
-            <span className="eyebrow">YOUR ROUTE THROUGH THE PROJECT</span>
+            <span className="eyebrow">IN THE GUIDE</span>
             <ol className="project-outline">
               {lessonSteps(lesson).map((s, i) => (
                 <li key={s.title}>
                   <span>0{i + 1}</span>
                   <div>
                     <strong>{s.title}</strong>
-                    <small>
-                      {s.check === "read"
-                        ? "Understand and experiment"
-                        : "Build and check on the bench"}
-                    </small>
                   </div>
-                  <Check size={14} />
                 </li>
               ))}
             </ol>

@@ -1,32 +1,30 @@
-## Meet the breadboard
+## Run a working circuit
 
-**Goal:** build a blinking LED, then make it blink faster.
+This project starts with a wired LED and a working sketch. Press **Start simulation**. The external LED lights for half a second, then goes dark for half a second.
 
-An LED needs a closed path: **D13 → resistor → LED → GND**. The resistor limits current in real hardware; Piko checks the connection without calculating analog current.
+The small L indicator on the Uno also follows D13. It is separate from the external LED on the breadboard.
 
-Select **Show breadboard strips**. Each numbered column connects its five a–e holes. The five f–j holes form a separate strip. The center gap separates them.
+The circuit and code are both editable. Stop simulation to change wiring; rerun after changing code to execute your edits.
 
-The + and − rail marks are labels: a rail has no power until you connect it to the Uno.
+## Why the LED lights
 
-**Predict:** if the D13 jumper is missing, can the LED light?
+The output branch is **D13 → 330 Ω resistor → LED → GND**. When the sketch sets D13 HIGH, the output is near 5 V relative to GND and can supply this branch. LOW puts the output near 0 V, so the LED goes dark.
 
-## Complete one connection
+The LED conducts in one direction. Its anode (+, usually the longer leg) faces the resistor; its cathode (−, usually the shorter leg and flat side) faces ground. The resistor limits current in physical hardware. Piko checks this supported wiring digitally; it does not measure or solve analog current.
 
-The resistor, LED and ground return are already placed. One wire is missing.
+Breadboard A5 and B5 are connected internally, bringing D13 to the resistor. Within each numbered column, holes a–e share a strip; f–j share a separate strip. The center gap separates them. **Show breadboard strips** reveals those connections.
 
-1. Stop simulation if it is running.
-2. Click **Uno D13**.
-3. Click breadboard **A5** to finish the wire.
+To test the path, stop simulation, select the D13 jumper, and delete it. Run again: the onboard light can blink while the external LED stays off. Undo the circuit edit to reconnect it.
 
-For precise keyboard selection, use **Add wire…**, choose *Uno D13* and *Breadboard A5*, then Connect.
+## Read the sketch
 
-A wire connects at its two ends. Crossing another wire does not join them.
+`setup()` runs once and configures D13 as an output:
 
-**Why A5?** A5 and B5 share a strip, so D13 reaches the resistor’s first lead at B5.
+```cpp
+pinMode(LED_PIN, OUTPUT);
+```
 
-## Run and explain
-
-Press **Start simulation** and watch the external LED. Open **Inspect**, choose D13 and compare the trace with the light.
+`loop()` repeats these instructions:
 
 ```cpp
 digitalWrite(LED_PIN, HIGH);
@@ -35,18 +33,16 @@ digitalWrite(LED_PIN, LOW);
 delay(500);
 ```
 
-HIGH lasts half a second, then LOW lasts half a second: one complete cycle takes a second.
+`delay(500)` waits 500 simulated milliseconds. A complete on/off cycle takes one second. Open Inspect, select D13, and compare the digital trace with the LED.
 
-**Pause** freezes simulated time. **Stop simulation** returns to editing.
+Pause freezes simulated time and outputs. Resume continues that program. A new run starts again from `setup()`.
 
-The small onboard L indicator also follows D13. It is separate from the external LED on the breadboard.
+## Change the rhythm
 
-## Make it your own
+Stop simulation, open Code, and change **both** delays to 100. Run again: the LED switches every tenth of a second.
 
-Stop simulation, open **Code**, and change **both** delays from 500 to 100. Run again.
+Next, try 100 ms HIGH and 900 ms LOW. A complete cycle still takes one second, but the LED is on for only 10% of it. That fraction is called the *duty cycle*.
 
-If you get stuck, **Reset step code** restores the 500 ms starting sketch and stops simulation without changing your wiring.
+For a different experiment, remove the LOW write but keep both delays. Run again. The LED stays on: waiting does not change the last output value.
 
-Check this step after a few blinks. The check uses simulated pin transitions, so editing text alone does not complete it.
-
-**Try next:** use 100 ms HIGH and 900 ms LOW. The period is still one second, but the LED is on for only 10% of it. That fraction is its *duty cycle*.
+**Restore example code** in the guide brings back the original sketch without replacing your wiring. Circuit edits have their own Undo.

@@ -83,16 +83,7 @@ export function lessonSteps(lesson: Lesson) {
 }
 export function lessonProject(lesson: Lesson) {
   const preset = PRESETS.find((p) => p.id === lesson.preset)!;
-  const doc = preset.create();
-  if (lesson.id === "blink") doc.wires = doc.wires.filter((w) => w.id !== "W1");
-  const sketch =
-    lesson.id === "lcd"
-      ? preset.sketch.replace(
-          '  lcd.print("Hello, Piko!");',
-          '  // TODO: print "Hello, Piko!" on the first row.\n  // Add lcd.print(...) here.',
-        )
-      : preset.sketch;
-  return { doc, sketch };
+  return { doc: preset.create(), sketch: preset.sketch };
 }
 export type Evidence = {
   pressed: boolean;
@@ -219,7 +210,9 @@ export function checkStep(
 
 export function lessonStepCode(lesson: Lesson, index: number): string | null {
   const check = lesson.checks[index];
-  if (check === "lcd-text") return lessonProject(lesson).sketch;
+  if (check === "lcd-text") return lessonProject(lesson).sketch.replace(
+    '  lcd.print("Hello, Piko!");', '// TODO: print a greeting.\n  // Add lcd.print(...) here.',
+  );
   if (
     check === "lcd-label" ||
     check === "fast-blink" ||

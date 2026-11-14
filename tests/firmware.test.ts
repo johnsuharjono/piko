@@ -263,22 +263,19 @@ it("executes LiquidCrystal firmware through GPIO edges and updates both LCD rows
   expect(disconnected.snapshot().lcd).toBeUndefined();
 });
 
-it("checks the guided LCD coding tasks against real compiled output", async () => {
+it("runs the LCD article example and its message experiment as real firmware", async () => {
   const lesson = LESSONS.find((l) => l.id === "lcd")!;
   const project = lessonProject(lesson);
   const evidence = { pressed: false, released: false };
   const pins = lcdConnections(project.doc);
   const starter = new Machine(await compile(project.sketch), pins);
   advance(starter, 150);
-  expect(starter.snapshot().lcd?.[0].trim()).toBe("");
+  expect(starter.snapshot().lcd?.[0].trim()).toBe("Hello, Piko!");
   expect(starter.snapshot().lcd?.[1]).toContain("Seconds: 0");
   expect(
     checkStep("lcd-text", project.doc, starter.snapshot(), evidence).passed,
-  ).toBe(false);
-  const greeting = project.sketch.replace(
-    "// Add lcd.print(...) here.",
-    'lcd.print("Hello, Piko!");',
-  );
+  ).toBe(true);
+  const greeting = project.sketch;
   const first = new Machine(await compile(greeting), pins);
   advance(first, 150);
   expect(

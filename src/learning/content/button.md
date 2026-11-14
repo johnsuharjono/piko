@@ -1,42 +1,75 @@
-## Predict the input
+## Two circuits, connected by code
 
-**Goal:** understand how a physical input changes a program’s output.
+This example turns the LED on while you hold the button. The button does not switch the LED’s power directly. The Arduino reads one pin and drives another:
 
-This project adds a momentary pushbutton to the Blink circuit. One contact connects to D2; the other connects to GND.
+**D2 → program decision → D13**
 
-`INPUT_PULLUP` holds the unpressed input HIGH. Pressing the button joins D2 to GND, making it LOW.
+The two branches share GND:
 
-**Predict:** will pressing the button read HIGH or LOW? The answer is LOW—pressed does not always mean HIGH.
+- **Input:** D2 → button → GND.
+- **Output:** D13 → 330 Ω resistor → LED → GND.
 
-## Follow the circuit
+Start simulation and hold the button’s center. Release it: the LED turns off. Stop simulation before moving components or editing wires.
 
-Locate the button on the lower half of the breadboard. Its contacts occupy **H21** and **H23**.
+## What HIGH, LOW and pull-up mean
 
-- D2 connects to F21. F21 and H21 share a strip.
-- J23 connects to GND. J23 and H23 share another strip.
-- Holding the button joins the two contacts.
+HIGH and LOW describe a pin’s voltage **relative to GND**. In this 5 V Uno circuit, HIGH is near 5 V and LOW is near 0 V. These are digital states, not measurements of current and not universal meanings of “on” and “off.”
 
-Use **Show breadboard strips** or hover a terminal to follow the connection.
+```cpp
+pinMode(INPUT_PIN, INPUT_PULLUP);
+```
 
-This is an ideal two-terminal button model. Real tactile switches may have four legs and mechanical bounce.
+This enables a resistor **inside the Arduino**, connecting D2 weakly to 5 V. It is separate from the visible resistor beside the LED.
 
-## Press and release
+```text
+5 V ── internal pull-up resistor ──┬── D2 input
+                                  │
+                                button
+                                  │
+                                 GND
+```
 
-Start simulation. **Hold the button’s center**, then release it. The LED should turn on while held, then turn off.
+**Released:** the button is an open switch. D2 draws almost no current, so there is almost no voltage drop across the pull-up. D2 sits near 5 V and reads HIGH. A HIGH input does not require a continuous flow of current through the button.
 
-You can also focus the button and hold Space or Enter. During simulation the canvas operates inputs; stop first to move parts or change wires.
+**Pressed:** the button connects D2 to GND. D2 sits near 0 V and reads LOW. A small current now flows from 5 V through the internal pull-up and the button to GND. The resistor limits that current; pressing does not bypass it.
+
+Without the pull-up, an open button would leave D2 floating: real hardware could read noise instead of a dependable state. Piko models digital states, not analog noise or measured current.
+
+The LED’s resistor stays in the D13 branch the whole time. The button never bypasses that resistor or the LED.
+
+[Arduino’s input pull-up example](https://docs.arduino.cc/built-in-examples/digital/InputPullupSerial) explains the same wiring.
+
+## How the program joins them
+
+Open Code. The sketch sets D13 to OUTPUT, and D2 to INPUT_PULLUP. In `loop()`, it makes this decision repeatedly:
 
 ```cpp
 bool active = digitalRead(INPUT_PIN) == LOW;
 digitalWrite(LED_PIN, active ? HIGH : LOW);
 ```
 
-The check needs to observe both the pressed/light-on and released/light-off states during this lesson.
+`digitalRead()` reads D2. Comparing it with LOW makes `active` true while pressed. The `? :` expression then chooses HIGH for D13 when active, otherwise LOW.
 
-## Experiment with the logic
+Pressed: **D2 LOW → active true → D13 HIGH → LED on.**
 
-Try changing `== LOW` to `== HIGH`. Stop and rerun the sketch: the LED should now be on while released and off while held.
+Released: **D2 HIGH → active false → D13 LOW → LED off.**
 
-**Explain it:** the wiring has not changed. The program changed how it interprets the input.
+D13 supplies the LED branch when HIGH. When LOW, there is no forward supply voltage to light this LED. The small onboard D13 light is a separate LED.
 
-A future counter project needs *edge detection*: count a press once, rather than once on every pass through `loop()`. On real hardware, debouncing is another step.
+Open Inspect and choose D2 to see the input change. Choose D13 to see the program’s output. Their states are opposite in this sketch.
+
+## Reverse the behaviour
+
+Stop simulation. Change only the comparison:
+
+```cpp
+bool active = digitalRead(INPUT_PIN) == HIGH;
+```
+
+Run again. The LED should stay on while released and go off while pressed. The wiring is identical; your program now interprets the same input differently.
+
+Try replacing the output instruction with `digitalWrite(LED_PIN, HIGH);`. Run again: the LED stays on regardless of the button, because the output no longer uses the input reading.
+
+**Restore example code** brings back the original sketch without changing your wiring. Use Undo for circuit edits.
+
+The button here is an ideal two-terminal contact. Real tactile switches can have four legs and mechanical bounce, which needs additional handling in physical projects.

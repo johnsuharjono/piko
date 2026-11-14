@@ -1,24 +1,22 @@
-## Build something that remembers
+## Try the counter
 
-**Goal:** count button presses on an LCD, then reset the count.
+Start simulation and press **ADD** twice. The LCD should show **Count: 2**. Hold ADD: the count should increase only once for that press. Press **RESET** to return to zero.
 
-This project combines inputs, a variable and a display. It starts wired and working so you can trace each connection, run it, then change the program.
+The sketch stores a number in a variable, reads two buttons, and prints the result. This working example brings together the separate button and LCD projects.
 
-The ADD button goes to **D8**. RESET goes to **D9**. Both use `INPUT_PULLUP`: released is HIGH; held is LOW. The LCD uses D12, D11 and D5–D2, leaving D8 and D9 for inputs.
+## Inputs, output and shared ground
 
-## Follow the whole circuit
+ADD connects **D8 to GND** when pressed. RESET connects **D9 to GND**. Both pins use `INPUT_PULLUP`: an internal resistor holds the released input near 5 V (HIGH), while a pressed button connects it to ground (LOW).
 
-Use the pin-finder buttons below to locate **D8**, **D9**, or **GND**. The highlight follows the connected net, not just one dot.
+These buttons do not directly power the display. The program reads their states, updates its number, then tells the LCD what to show. All parts share GND as their voltage reference.
 
-Trace each input through a five-hole breadboard strip to its button. The other contact goes to the lower ground rail. A jumper joins that rail to the top ground rail, which returns to Uno GND.
+The LCD uses D12, D11 and D5–D2 for commands and data. Its power comes through the breadboard rails. The buttons use the lower ground rail, joined to the upper ground rail and Uno GND by jumpers.
 
-LCD power also uses the breadboard rails. The six blue wires carry LCD commands and data. Wire crossings do not connect unless endpoints share a net.
+Wire crossings do not connect by themselves; endpoints must share a terminal or an internally connected breadboard strip.
 
-**Check my bench** verifies both input paths and the LCD connections.
+## Count a press once
 
-## Count presses, not time held
-
-Start simulation. Hold **ADD**: the display should increase by one and stay there. Release it, then press it again. Reach a count of at least two before checking.
+Open Code and find this condition in `loop()`:
 
 ```cpp
 if (add == LOW && lastAdd == HIGH) {
@@ -27,23 +25,30 @@ if (add == LOW && lastAdd == HIGH) {
 }
 ```
 
-The program compares the current reading with its previous reading. It increments on the transition from released to pressed, called a *falling edge*. It does not increment repeatedly while held.
+`add` is the current D8 reading. `lastAdd` is the reading from the previous pass through the loop. This condition is true only when the input has just changed from HIGH to LOW: a *falling edge*.
 
-Open Code beside the circuit to find the condition. Open Inspect and select D8 to watch the input while the guide stays visible.
-
-## Reset, then make it yours
-
-Press **RESET** after counting. The display should return to zero. The check must observe an earlier count and a reset input driving the displayed count to zero.
+The program then stores the current reading for the next pass:
 
 ```cpp
-count = 0;
-showCount();
+lastAdd = add;
 ```
 
-**Experiment:** stop, change `count++` to `count += 2`, and run again. Predict the result before pressing ADD. Reset step code brings back the original counter program without changing the wiring.
+While held, both readings are LOW, so the count does not keep increasing. The counter’s state lives in `count`; `showCount()` sends that value to the LCD.
 
-**Find a fault:** stop, disconnect a button’s ground jumper and run. Why can it no longer pull its input LOW? Undo the wire edit to repair it.
+Try changing the condition to `if (add == LOW)`. Run and hold ADD. The count rises repeatedly because the loop keeps seeing a pressed button. Stop and restore the original condition afterward.
 
-Download the entire project when you want to keep your experiment. Open that `.piko.json` file from Home to bring back the circuit and code together. Reloading without exporting starts a fresh session.
+## Make a different counter
 
-The buttons are ideal contacts. Real mechanical switches may bounce; this simulator does not model that behavior yet.
+Stop simulation and change `count++` to:
+
+```cpp
+count += 2;
+```
+
+Run and press ADD. Each press should add two. RESET still runs `count = 0;` followed by `showCount();`, so it returns to zero.
+
+Next, change the initial value from `unsigned long count = 0;` to `unsigned long count = 10;`. A fresh run begins at ten, while RESET still sets zero. Initial values and reset behaviour are separate decisions in your code.
+
+**Restore example code** brings back the original program. To keep your experiment across reloads, choose **Project → Export project**. Reopen the .piko.json file from Home to restore code and wiring together.
+
+Buttons here are ideal contacts. Physical mechanical switches can bounce and may need additional debouncing.

@@ -1,4 +1,5 @@
-import { pikoEditorTheme } from "../editor-theme";
+import { pikoEditorTheme, pikoLightEditorTheme } from "../editor-theme";
+import { useTheme } from "./theme-toggle";
 import { memo } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { cpp } from "@codemirror/lang-cpp";
@@ -25,13 +26,14 @@ export default memo(function CodeEditor({
   readOnly?: boolean;
   language?: "cpp" | "json";
 }) {
+  const { theme } = useTheme();
   return (
     <CodeMirror
       value={value}
       onChange={onChange}
       extensions={language === "cpp" ? extensions : plainExtensions}
       readOnly={readOnly}
-      theme={pikoEditorTheme}
+      theme={theme === "dark" ? pikoEditorTheme : pikoLightEditorTheme}
       height="100%"
       aria-label={language === "cpp" ? "Arduino sketch" : "Circuit document"}
       basicSetup={basicSetup}

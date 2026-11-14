@@ -35,7 +35,7 @@ export function Trace({
         <g key={i}>
           <path
             d={`M${60 + i * 210} 15V94`}
-            stroke="#343838"
+            stroke="var(--border)"
             strokeDasharray="3 5"
           />
           <text x={60 + i * 210} y="116" textAnchor="middle">
@@ -43,7 +43,7 @@ export function Trace({
           </text>
         </g>
       ))}
-      <path d="M60 28H900 M60 84H900" stroke="#303637" />
+      <path d="M60 28H900 M60 84H900" stroke="var(--border)" />
       <text x="0" y="32">
         HIGH
       </text>
@@ -53,14 +53,14 @@ export function Trace({
       <path
         d={path}
         fill="none"
-        stroke="#e5a373"
+        stroke="var(--primary)"
         strokeWidth="2"
         strokeLinejoin="round"
       />
       {time > 0 && (
         <>
-          <path d={`M${x(time)} 15V94`} stroke="#d6dbd3" strokeWidth="1" />
-          <circle cx={x(time)} cy="15" r="3" fill="#d6dbd3" />
+          <path d={`M${x(time)} 15V94`} stroke="var(--muted)" strokeWidth="1" />
+          <circle cx={x(time)} cy="15" r="3" fill="var(--muted)" />
         </>
       )}
     </svg>

@@ -12,6 +12,74 @@
   --pink: #f087bd;
   --purple: #b7a2f5;
 }
+:root {
+  --primary-foreground: #1b1e28;
+  --primary-hover: #85efd9;
+  --canvas: #191c26;
+  --floating: #202430f5;
+  --art-surface: #222936;
+  --code-surface: #171a23;
+  --shadow: #00000040;
+  --grid: #394056;
+  --active-line: #717cb418;
+  --selection: #506c8c55;
+  --selection-focused: #506c8c88;
+  --syntax-keyword: #f087bd;
+  --syntax-type: #add7ff;
+  --syntax-function: #5de4c7;
+  --syntax-string: #71c8b4;
+  --syntax-number: #b7a2f5;
+  --syntax-comment: #818caf;
+  --syntax-punctuation: #89ddff;
+  --wire-orange: #f2ad66;
+  --wire-green: #5de4b3;
+  --wire-blue: #89c8f4;
+  --wire-purple: #c6a0ed;
+  --wire-yellow: #ead37c;
+  --wire-ground: #adb9cc;
+  --wire-outline: #10131c;
+  --free-part-label: #a6accd;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --background: #f8fafc;
+  --foreground: #334155;
+  --primary: #087b69;
+  --primary-foreground: #ffffff;
+  --primary-hover: #076957;
+  --border: #cbd5e1;
+  --surface: #ffffff;
+  --raised: #e9eef5;
+  --muted: #52637a;
+  --bright: #172638;
+  --pink: #a52b69;
+  --purple: #7053b8;
+  --canvas: #edf2f7;
+  --floating: #fffffff5;
+  --art-surface: #e6eef5;
+  --code-surface: #edf2f7;
+  --shadow: #33415518;
+  --grid: #b7c7d8;
+  --active-line: #5277a30c;
+  --selection: #83b5db55;
+  --selection-focused: #83b5db88;
+  --syntax-keyword: #a52b69;
+  --syntax-type: #285b9d;
+  --syntax-function: #087b69;
+  --syntax-string: #256d4c;
+  --syntax-number: #7053b8;
+  --syntax-comment: #5b6b81;
+  --syntax-punctuation: #435b78;
+  --wire-orange: #b56b1e;
+  --wire-green: #16805d;
+  --wire-blue: #327aac;
+  --wire-purple: #9165ac;
+  --wire-yellow: #927418;
+  --wire-ground: #526477;
+  --wire-outline: #f8fafc;
+  --free-part-label: #334155;
+}
+
 body,
 .site-page,
 .site-header,
@@ -82,18 +150,18 @@ input:focus-visible {
 }
 .app-toolbar .run-button {
   background: var(--primary);
-  color: #1b1e28;
+  color: var(--primary-foreground);
   border: 0;
 }
 .app-toolbar .run-button:hover {
-  background: #85efd9;
+  background: var(--primary-hover);
 }
 .app-toolbar > button:disabled {
   opacity: 0.4;
 }
 .circuit-builder,
 .simulator-workbench {
-  background: #191c26;
+  background: var(--canvas);
 }
 .wiring-tools,
 .canvas-actions,
@@ -101,7 +169,7 @@ input:focus-visible {
 .builder-inspector,
 .connection-hint,
 .keyboard-wiring {
-  background: #202430ee;
+  background: var(--floating);
   color: var(--foreground);
   border: 1px solid var(--border);
   box-shadow: 0 4px 20px #00000020;
@@ -161,14 +229,14 @@ input:focus-visible {
   color: var(--bright);
 }
 .part-search::placeholder {
-  color: #626c8b;
+  color: var(--muted);
 }
 .simulator-workbench .bench-tools,
 .simulator-workbench .detail-panel,
 .simulator-workbench .help-panel {
   background: var(--surface);
   border-color: var(--border) !important;
-  box-shadow: 0 8px 35px #00000040;
+  box-shadow: 0 8px 35px var(--shadow);
 }
 .builder-selection > strong {
   color: var(--bright);
@@ -220,7 +288,7 @@ input:focus-visible {
   stroke: var(--primary);
 }
 .file-tabs {
-  background: #191c26;
+  background: var(--canvas);
   border-color: var(--border);
 }
 .file-tabs button {
@@ -238,24 +306,24 @@ input:focus-visible {
 }
 .editor-container .cm-gutters {
   background: var(--background);
-  color: #626c8b;
+  color: var(--muted);
 }
 .editor-container .cm-activeLine {
-  background: #717cb414;
+  background: var(--active-line);
 }
 .editor-container .cm-activeLineGutter {
   background: var(--raised);
   color: var(--primary);
 }
 .editor-container .cm-editor .cm-selectionBackground {
-  background: #506c8c55;
+  background: var(--selection);
 }
 .editor-container
   .cm-editor.cm-focused
   > .cm-scroller
   > .cm-selectionLayer
   .cm-selectionBackground {
-  background: #506c8c99;
+  background: var(--selection-focused);
 }
 .editor-footer,
 .editor-footer button {
@@ -266,11 +334,11 @@ input:focus-visible {
   background: #5de4c750;
 }
 .learning-panel {
-  background: #1d202b;
+  background: var(--surface);
   border-color: var(--border);
 }
 .learning-panel .panel-header {
-  background: #1d202b;
+  background: var(--surface);
 }
 .learning-intro,
 .lesson-markdown,
@@ -313,12 +381,12 @@ input:focus-visible {
 }
 .lesson-markdown code,
 .lesson-markdown pre {
-  background: #252a37;
-  color: #add7ff;
+  background: var(--raised);
+  color: var(--syntax-type);
   border-color: var(--border);
 }
 .lesson-markdown pre {
-  background: #171a23;
+  background: var(--code-surface);
 }
 .lesson-check p,
 .learning-notice {
@@ -339,7 +407,7 @@ input:focus-visible {
 }
 .console-panel,
 .console-panel pre {
-  background: #171a23;
+  background: var(--code-surface);
   color: var(--foreground);
   border-color: var(--border);
 }
@@ -386,12 +454,12 @@ input:focus-visible {
 }
 .primary-link {
   background: var(--primary);
-  color: #1b1e28;
+  color: var(--primary-foreground);
 }
 .hero-illustration,
 .intro-art,
 .project-art {
-  background: #222936;
+  background: var(--art-surface);
   border-color: var(--border);
 }
 .hero-illustration {
@@ -453,3 +521,9 @@ input:focus-visible {
 .editor-container .cm-scroller {
   line-height: 1.8;
 }
+
+.theme-toggle { flex-shrink: 0; color: var(--muted); }
+.site-header > .theme-toggle { margin-left: 12px; }
+.primary-link:hover { background: var(--primary-hover); }
+.project-divider, .nav-divider { background: var(--border); }
+.trace-svg line, .trace-svg > path:not([fill="none"]) { stroke: var(--border); }

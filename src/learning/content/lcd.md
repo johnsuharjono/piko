@@ -1,63 +1,53 @@
-## A display is a device
+## Run the display
 
-**Goal:** send text and a changing value to a 16×2 LCD.
+Start simulation. The first row should show **Hello, Piko!**; the second shows elapsed simulated seconds. This project starts with a working circuit and sketch so you can experiment immediately.
 
-The screen contains its own controller. The Uno sends commands and character data; the controller remembers what to display.
+The LCD contains its own controller. The Uno sends commands and characters, and the controller remembers the display contents. Arduino’s `LiquidCrystal` library turns your instructions into pin pulses; Piko decodes those pulses in its simulation worker.
 
-This project uses Arduino’s `LiquidCrystal` library and a four-bit interface. The library turns `lcd.print()` into pin pulses. Piko decodes those pulses in the simulation worker.
+This model fixes backlight and contrast internally. It is a simplified module, not a complete physical 16-pin LCD wiring diagram.
 
-This educational module fixes contrast and backlight internally. It is not a complete physical 16-pin LCD wiring diagram.
+## Understand the connections
 
-## Trace power and signals
-
-The breadboard is a **power distribution point** here. The LCD does not have to sit on it.
+The breadboard distributes power; the display does not have to sit on it.
 
 - Uno **5V → top + rail → LCD 5V**.
 - Uno **GND → top − rail → LCD GND**.
-- LCD **RW → the same ground rail** selects write-only operation.
-- **RS → D12**, **E → D11**.
-- LCD **D4, D5, D6, D7 → Uno D5, D4, D3, D2** respectively.
+- LCD **RW → ground rail** selects write-only operation.
+- LCD **RS → Uno D12**, and **E → Uno D11**.
+- LCD **D4, D5, D6, D7 → Uno D5, D4, D3, D2**, respectively.
 
-The rail splits between columns 15 and 16. All these power connections use the first half.
+The rail splits between columns 15 and 16. These power connections all use its first half. Rail markings do not supply power by themselves.
 
-Wire colors are a visual convention, not an electrical property: orange marks supply, gray marks ground, and blue marks data/control in this example.
-
-## Write your first message
-
-**Your task:** add the missing print instruction. The guided sketch initializes the LCD, but deliberately leaves its first row blank.
-
-1. Stop simulation and open **Code** on the right.
-2. Find `void setup()`. After `lcd.begin(16, 2);`, replace the TODO comments with this line:
+RS selects a command or character data; E signals when to accept it. Four data wires carry each byte in two pieces. The constructor matches that wiring:
 
 ```cpp
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+```
+
+Its arguments are **RS, E, D4, D5, D6, D7**, in that order. The LCD’s D4 label and the Uno’s D4 label name different terminals; they do not automatically connect.
+
+## Write your own message
+
+Stop simulation and open Code. Find these instructions inside `setup()`:
+
+```cpp
+lcd.begin(16, 2);
 lcd.print("Hello, Piko!");
 ```
 
-3. Keep this line **inside setup’s braces**, after `lcd.begin()` and before the closing `}`.
-4. Press **Start simulation**. You should see **Hello, Piko!** on the first row and seconds on the second.
-5. Press **Check my bench**. A running counter alone will not pass: the first-row greeting must appear.
-
-`lcd.begin(16, 2)` sets up the 16 columns and two rows. `lcd.print()` sends characters at the current cursor position. `setup()` runs once at startup.
-
-If the screen stays blank, open Inspect for wiring issues, then Console for compiler or execution errors. Code changes need a fresh run. If you get stuck, **Reset step code** restores the TODO scaffold for this step and stops the simulation. It keeps your circuit wiring.
-
-## Make it say something new
-
-**Your task:** change the greeting in your code, then run it again.
-
-1. Stop simulation.
-2. In `setup()`, replace only the text between the quotation marks. For example:
+`begin()` configures 16 columns and two rows. `print()` writes characters at the current cursor. Change the quoted greeting, keeping it within 16 printable characters:
 
 ```cpp
 lcd.print("My first LCD!");
 ```
 
-3. Use a nonempty message of at most 16 printable characters. Keep the quotation marks and semicolon.
-4. Start simulation again, then **Check my bench**. The check reads the LCD’s first row; leaving the original greeting or only editing the code will not pass.
+Run again and look at the first row. It should show your message. Editing code does not change firmware already running; you need a new run.
 
-**Predict:** what happens if you edit the message while the program is running? The current program keeps its old message until you stop and rerun.
+If nothing appears, check Console for compiler errors and Inspect for wiring issues. **Restore example code** brings back the original sketch while preserving your wiring.
 
-The second row comes from these instructions in `loop()`:
+## Position text and values
+
+The second row comes from `loop()`:
 
 ```cpp
 lcd.setCursor(0, 1);
@@ -65,10 +55,8 @@ lcd.print("Seconds: ");
 lcd.print(millis() / 1000);
 ```
 
-Columns and rows start at zero: `(0, 1)` is the first column of the second row. `millis()` counts simulated milliseconds since this program started.
+Rows and columns start at zero, so `(0, 1)` is the first column on the second row. `millis()` counts simulated milliseconds since the program started. Dividing by 1000 gives whole seconds.
 
-**Reset step code** on this step brings back the original greeting so you can try again. It does not load a different example or change the wiring.
+Change `Seconds: ` to `Time: ` and rerun. Then try `lcd.setCursor(2, 1)` to move the label two columns right. Keep the rest of the row inside the 16-column display.
 
-**Extra experiment:** change `Seconds: ` to `Time: `, stop and rerun. The number still advances because the program is printing a value, not a fixed picture.
-
-This first model supports basic printable text, clear/home, positioning, entry direction and display on/off. Custom glyphs, scrolling, cursor graphics, I²C and analog contrast control are not supported yet.
+The model supports basic printable text, clear/home, cursor positioning, entry direction and display on/off. Custom glyphs, scrolling, cursor graphics, I²C and analog contrast control are not supported yet.

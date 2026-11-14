@@ -11,7 +11,7 @@ import { PRESETS } from "../src/circuit/presets";
 import { analyzeCircuit, parseCircuit, terminals } from "../src/circuit/model";
 import { INITIAL } from "../src/simulation/machine";
 const evidence = { pressed: false, released: false };
-it("pairs Markdown sections with explicit check definitions and starts a real incomplete build", () => {
+it("pairs Markdown sections with explicit check definitions and opens a working example", () => {
   for (const lesson of LESSONS) {
     const steps = lessonSteps(lesson);
     expect(steps).toHaveLength(lesson.checks.length);
@@ -19,6 +19,8 @@ it("pairs Markdown sections with explicit check definitions and starts a real in
     expect(parseCircuit(lessonProject(lesson).doc)).not.toBeNull();
   }
   const doc = lessonProject(LESSONS.find(l=>l.id === "blink")!).doc;
+  expect(checkStep("led-wired", doc, INITIAL, evidence).passed).toBe(true);
+  doc.wires = doc.wires.filter(w => w.id !== "W1");
   expect(checkStep("led-wired", doc, INITIAL, evidence).passed).toBe(false);
   doc.wires.push({
     id: "W1",
@@ -100,11 +102,10 @@ it("keeps LCD power on the breadboard and all preset wire paths off the glass", 
   expect(parseCircuit(invalid)).toBeNull();
 });
 
-it("makes the LCD lesson a code exercise and checks the executed first row", () => {
+it("opens the LCD article with working code and verifies real first-row output", () => {
   const lesson = LESSONS.find((l) => l.id === "lcd")!;
   const project = lessonProject(lesson);
-  expect(project.sketch).toContain("// TODO:");
-  expect(project.sketch).not.toContain('  lcd.print("Hello, Piko!");');
+  expect(project.sketch).toContain('  lcd.print("Hello, Piko!");');
   const snapshot = structuredClone(INITIAL);
   snapshot.lcd = ["                ", "Seconds: 0      "];
   expect(checkStep("lcd-text", project.doc, snapshot, evidence).passed).toBe(

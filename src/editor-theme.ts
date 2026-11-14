@@ -1,62 +1,66 @@
 import { EditorView } from "@uiw/react-codemirror";
 import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 import { tags } from "@lezer/highlight";
-export const pikoEditorTheme = [
+function editorTheme(dark: boolean) { return [
   EditorView.theme(
     {
-      "&": { color: "#a6accd", backgroundColor: "#1b1e28" },
-      ".cm-content": { caretColor: "#5de4c7" },
-      ".cm-cursor,.cm-dropCursor": { borderLeftColor: "#5de4c7" },
+      "&": { color: "var(--foreground)", backgroundColor: "var(--background)" },
+      ".cm-content": { caretColor: "var(--primary)" },
+      ".cm-cursor,.cm-dropCursor": { borderLeftColor: "var(--primary)" },
       ".cm-gutters": {
-        color: "#647091",
-        backgroundColor: "#1b1e28",
+        color: "var(--muted)",
+        backgroundColor: "var(--background)",
         border: "none",
       },
-      ".cm-activeLine": { backgroundColor: "#717cb418" },
-      ".cm-activeLineGutter": { backgroundColor: "#252a37", color: "#5de4c7" },
+      ".cm-activeLine": { backgroundColor: "var(--active-line)" },
+      ".cm-activeLineGutter": { backgroundColor: "var(--raised)", color: "var(--primary)" },
       "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground":
-        { backgroundColor: "#506c8c88" },
-      ".cm-selectionBackground": { backgroundColor: "#506c8c55" },
+        { backgroundColor: "var(--selection-focused)" },
+      ".cm-selectionBackground": { backgroundColor: "var(--selection)" },
       ".cm-tooltip": {
-        backgroundColor: "#252a37",
-        color: "#e4f0fb",
-        border: "1px solid #394156",
+        backgroundColor: "var(--raised)",
+        color: "var(--bright)",
+        border: "1px solid var(--border)",
       },
       ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
-        backgroundColor: "#343b50",
-        color: "#5de4c7",
+        backgroundColor: "var(--raised)",
+        color: "var(--primary)",
       },
       ".cm-foldPlaceholder": {
-        backgroundColor: "#303647",
-        color: "#a6accd",
+        backgroundColor: "var(--border)",
+        color: "var(--foreground)",
         border: "none",
       },
       "&.cm-focused .cm-matchingBracket": {
-        color: "#5de4c7",
-        backgroundColor: "#5de4c718",
+        color: "var(--primary)",
+        backgroundColor: "var(--active-line)",
       },
     },
-    { dark: true },
+    { dark },
   ),
   syntaxHighlighting(
     HighlightStyle.define([
-      { tag: tags.keyword, color: "#f087bd" },
+      { tag: tags.keyword, color: "var(--syntax-keyword)" },
       {
         tag: [tags.typeName, tags.className, tags.namespace],
-        color: "#add7ff",
+        color: "var(--syntax-type)",
       },
       {
         tag: [
           tags.function(tags.variableName),
           tags.function(tags.propertyName),
         ],
-        color: "#5de4c7",
+        color: "var(--primary)",
       },
-      { tag: tags.string, color: "#5fb3a1" },
-      { tag: [tags.number, tags.bool, tags.null], color: "#b7a2f5" },
-      { tag: tags.comment, color: "#717c9e", fontStyle: "italic" },
-      { tag: [tags.operator, tags.punctuation], color: "#89ddff" },
-      { tag: tags.meta, color: "#add7ff" },
+      { tag: tags.string, color: "var(--syntax-string)" },
+      { tag: [tags.number, tags.bool, tags.null], color: "var(--syntax-number)" },
+      { tag: tags.comment, color: "var(--syntax-comment)", fontStyle: "italic" },
+      { tag: [tags.operator, tags.punctuation], color: "var(--syntax-punctuation)" },
+      { tag: tags.meta, color: "var(--syntax-type)" },
     ]),
   ),
 ];
+
+}
+export const pikoEditorTheme = editorTheme(true);
+export const pikoLightEditorTheme = editorTheme(false);

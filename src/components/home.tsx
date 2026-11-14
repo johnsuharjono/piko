@@ -1,4 +1,5 @@
 import { readProjectFile } from "../projects/file-io";
+import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
 import { useEffect, useState, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -26,6 +27,7 @@ export function SiteHeader() {
           Explore projects
         </Link>
       </nav>
+      <ThemeToggle />
     </header>
   );
 }
@@ -94,16 +96,16 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
             </h1>
             <p>
               {catalog
-                ? "Choose something to make. Follow a few steps, explore the code, and find out why it works."
+                ? "Working circuits, explained. Open a project, read its guide, and make it your own."
                 : "Write Arduino code, connect parts, and run it in your browser."}
             </p>
             <div className="hero-actions">
               <Link
                 to="/learn/$lessonId"
-                params={{ lessonId: "counter" }}
+                params={{ lessonId: "blink" }}
                 className="primary-link"
               >
-                Build a button counter <ArrowRight size={16} />
+                Make an LED blink <ArrowRight size={16} />
               </Link>
               <Button variant="outline" onClick={() => newBench()}>
                 <Plus size={16} /> Open an empty bench
@@ -169,7 +171,7 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
                   <span>
                     <strong>{p.name}</strong>
                     <small>
-                      {p.lessonId ? "Guided project" : "Free bench"} · Open
+                      {p.lessonId ? "Project + guide" : "Playground"} · Open
                       workspace
                     </small>
                   </span>
@@ -229,7 +231,7 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
           </section>
         )}
         <footer className="site-footer">
-          <span>Session only. Download a project to keep it.</span>
+          <span>Benches last for this session. Export a project to keep it.</span>
         </footer>
       </main>
     </div>

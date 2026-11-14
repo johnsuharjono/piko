@@ -4,19 +4,19 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
-  --color-primary-foreground: #1b1e28;
-  --color-secondary: #303340;
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--raised);
   --color-secondary-foreground: var(--foreground);
-  --color-muted: #252a37;
-  --color-muted-foreground: #8b94b5;
+  --color-muted: var(--raised);
+  --color-muted-foreground: var(--muted);
   --color-border: var(--border);
   --color-input: var(--border);
-  --color-ring: #5de4c7;
-  --color-destructive: #f087bd;
-  --color-popover: #252a37;
+  --color-ring: var(--primary);
+  --color-destructive: var(--pink);
+  --color-popover: var(--surface);
   --color-popover-foreground: var(--foreground);
-  --color-accent: #303647;
-  --color-accent-foreground: #e4f0fb;
+  --color-accent: var(--raised);
+  --color-accent-foreground: var(--bright);
 }
 :root {
   color-scheme: light;
@@ -2402,4 +2402,60 @@ button:disabled {
     width: min(280px, calc(100% - 20px));
     max-height: calc(100% - 135px);
   }
+}
+
+/* Keep board legends readable even when a jumper passes across the board. */
+.uno-pin-labels text {
+  paint-order: stroke;
+  stroke: #24678c;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+}
+.wire-edit-options {
+  width: 100%;
+  font-size: 12px;
+}
+.wire-edit-options summary {
+  cursor: pointer;
+  padding: 7px 0;
+  color: var(--muted);
+}
+.wire-edit-options summary:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+.wire-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 0;
+}
+/* Selection lives away from the persistent top-right workspace toggles. */
+.circuit-builder[data-external-tray="true"] .builder-inspector {
+  top: auto;
+  bottom: 14px;
+  max-height: calc(100% - 130px);
+}
+
+/* Project articles accompany the bench; they do not track course completion. */
+.learning-panel { width: 380px; flex-basis: 380px; }
+.article-contents { display: grid; gap: 9px; padding: 15px 0 22px; border-bottom: 1px solid var(--border); font-size: 12px; }
+.article-contents a { color: var(--primary); text-decoration: none; }
+.article-contents a:hover { text-decoration: underline; }
+.article-section { scroll-margin-top: 18px; padding-top: 24px; }
+.article-section h3 { color: var(--bright); font-size: 17px; line-height: 1.4; font-weight: 600; }
+.article-reset { padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; line-height: 1.6; }
+.article-reset p { margin-bottom: 10px; }
+.project-menu { position: relative; font-size: 12px; }
+.project-menu > summary { cursor: pointer; padding: 8px 12px; border-radius: 5px; color: var(--muted); }
+.project-menu > summary:focus-visible { outline: 2px solid var(--primary); }
+.project-menu-content { position: absolute; top: 36px; left: 0; width: 215px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; z-index: 30; box-shadow: 0 8px 24px #0005; }
+.project-menu-content small { display: block; padding: 4px 10px; color: var(--muted); font-size: 11px; }
+.circuit-builder[data-external-tray="true"] .builder-inspector { top: 64px; bottom: auto; }
+.circuit-builder .builder-inspector.selection-toolbar { top: 60px; bottom: auto; left: 14px; right: auto; width: auto; max-width: calc(100% - 28px); display: flex; align-items: center; gap: 12px; padding: 6px 10px; }
+.selection-toolbar .properties-header { margin: 0; }
+.selection-toolbar .builder-selection:empty { display: none; }
+@media (max-width: 700px) {
+  .learning-panel { width: min(380px, 100%); flex-basis: auto; }
+  .circuit-builder[data-external-tray="true"] .builder-inspector { top: 110px; }
 }

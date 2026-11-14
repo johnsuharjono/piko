@@ -7,6 +7,9 @@ import { CIRCUIT_KEY } from "../src/circuit/use-circuit";
 import { starterCircuit } from "../src/circuit/model";
 import { STARTER } from "../src/lib/examples";
 import { Bench } from "../src/components/bench";
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
+}));
 vi.mock("../src/components/code-editor", () => ({
   default: ({ value, language }: { value: string; language?: string }) => (
     <textarea
@@ -196,84 +199,43 @@ it("toggles Inspect on the right and exposes its state", async () => {
   expect(host.querySelector('[aria-label="Circuit inspector"]')).toBeNull();
 });
 
-it("renders Markdown lessons, checks a build and preserves saved progress", async () => {
-  await click(button("Learn"));
+it("opens a continuous project article without completion gates or saved reading progress", async () => {
+  await click(button("Project guide"));
   await act(async () => vi.dynamicImportSettled());
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
-  await click(button("Start blink lesson"));
-  expect(host.querySelector(".lesson-markdown strong")?.textContent).toBe(
-    "Goal:",
-  );
-  expect(JSON.parse(localStorage.getItem(CIRCUIT_KEY)!).wires).toHaveLength(2);
-  await click(button("Read & continue"));
-  await click(button("Check my bench"));
-  expect(host.textContent).toContain("Connect D13 to A5");
-  expect((button("Next") as HTMLButtonElement).disabled).toBe(true);
-  const saved = JSON.parse(localStorage.getItem("piko.learning.v1")!);
-  expect(saved.progress.blink).toEqual([0]);
-  await click(button("Learn"));
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeNull();
-  await click(button("Learn"));
-  expect(host.querySelector(".step-heading")?.textContent).toBe(
-    "Complete one connection",
-  );
+  await click(button("Open blink project"));
+  expect(host.querySelectorAll(".article-section")).toHaveLength(4);
+  expect(host.querySelector(".lesson-markdown pre code")?.textContent).toContain("pinMode");
+  expect(host.textContent).toContain("Change the rhythm");
+  expect(host.textContent).not.toContain("Check my bench");
+  expect(host.textContent).not.toContain("Mark as read");
+  expect(localStorage.getItem("piko.learning.v1")).toBeNull();
+  expect(JSON.parse(localStorage.getItem(CIRCUIT_KEY)!).wires).toHaveLength(3);
   await click(button("Inspect"));
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
+  expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Circuit inspector"]')).toBeTruthy();
   await click(button("Code"));
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Arduino code editor"]')).toBeTruthy();
-  expect(host.querySelector('[aria-label="Circuit inspector"]')).toBeTruthy();
+  expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
 });
 
-it("resets LCD step code without replacing the circuit or offering unrelated sketch choices", async () => {
-  await click(button("Learn"));
+it("restores an article's example code only after confirmation and preserves wiring", async () => {
+  await click(button("Project guide"));
   await act(async () => vi.dynamicImportSettled());
-  await click(button("Start LCD lesson"));
-  const before = localStorage.getItem(CIRCUIT_KEY);
-  await click(button("Step 3: Write your first message"));
+  await click(button("Open LCD project"));
   await click(button("Open code"));
   await act(async () => vi.dynamicImportSettled());
-  const code = () =>
-    (host.querySelector('[aria-label="Arduino sketch"]') as HTMLTextAreaElement)
-      .value;
-  expect(code()).toContain("// TODO:");
-  expect(host.querySelector('[aria-label="Example sketch"]')).toBeNull();
-  expect(
-    host.querySelector('[aria-label="Restore starter sketch"]'),
-  ).toBeNull();
-  await click(button("Step 4: Make it say something new"));
-  await click(button("Reset step code"));
+  const before = localStorage.getItem(CIRCUIT_KEY);
+  const code = () => (host.querySelector('[aria-label="Arduino sketch"]') as HTMLTextAreaElement).value;
   expect(code()).toContain('lcd.print("Hello, Piko!");');
-  await click(button("Step 3: Write your first message"));
-  await click(button("Reset step code"));
-  expect(code()).toContain("// TODO:");
+  await click(button("Restore example code"));
+  expect(host.querySelector('[aria-label="Restore example code"]')).toBeTruthy();
+  await click(button("Cancel"));
+  expect(host.querySelector('[aria-label="Restore example code"]')).toBeNull();
+  await click(button("Restore example code"));
+  await click(button("Replace code"));
+  expect(code()).toContain('lcd.print("Hello, Piko!");');
   expect(localStorage.getItem(CIRCUIT_KEY)).toBe(before);
-  expect(host.textContent).toContain("Your wiring is unchanged");
-});
-
-it("rechecks a completed wiring step before advancing if the bench changes", async () => {
-  await click(button("Learn"));
-  await act(async () => vi.dynamicImportSettled());
-  await click(button("Start blink lesson"));
-  expect(
-    Array.from(host.querySelectorAll("button")).some(
-      (b) => b.textContent?.trim() === "Next",
-    ),
-  ).toBe(false);
-  await click(button("Read & continue"));
-  await click(host.querySelector('[data-terminal="uno:D13"]')!);
-  await click(host.querySelector('[data-terminal="bb:BB1:A:5"]')!);
-  await click(button("Check my bench"));
-  expect((button("Next") as HTMLButtonElement).disabled).toBe(false);
-  // Break the just-validated connection without rechecking manually.
-  await click(button("Delete selected component or wire"));
-  await click(button("Next"));
-  expect(host.querySelector(".step-heading")?.textContent).toBe(
-    "Complete one connection",
-  );
-  expect((button("Next") as HTMLButtonElement).disabled).toBe(true);
-  expect(host.textContent).toContain("Connect D13 to A5");
+  expect(host.textContent).toContain("Example code restored");
 });
 
 it("shows component properties separately from the canvas tool panels", async () => {

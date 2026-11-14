@@ -25,10 +25,10 @@ pnpm start     # built Node server, also on 127.0.0.1:3000
 
 - **Home** (`/`): choose a first project, open an empty bench, or reopen a bench from the current session.
 - **Explore projects** (`/learn`): introductions for the complete button counter, Blink, button input, and LCD text.
-- **Project introduction** (`/learn/:lessonId`): outcome, components, lesson outline, and actions to start a fresh guided build or working example.
+- **Project introduction** (`/learn/:lessonId`): outcome, components, article outline, and actions to open a working bench with or without its guide.
 - **Workbench** (`/bench/:projectId`): project name, optional guide, resizable code editor on the left and live circuit on the right. Searchable parts and pin inspection open over the canvas without replacing code. Execution messages remain at the bottom.
 
-Projects keep their name, sketch, circuit and lesson association together through `src/projects/store.ts`. This is deliberately **in-memory session state**: navigating preserves benches, while reloading starts fresh. The routed app does not read or write localStorage. Download/Open project provides explicit portable files across sessions. An expired bench URL shows a clear return-to-Home screen. No accounts, progress dashboard or cloud database is involved.
+Projects keep their name, sketch, circuit and lesson association together through `src/projects/store.ts`. This is deliberately **in-memory session state**: navigating preserves benches, while reloading starts fresh. The routed app does not read or write localStorage. Export/Open project provides explicit portable files across sessions. An expired bench URL shows a clear return-to-Home screen. No accounts, progress dashboard or cloud database is involved.
 
 The project repository is the boundary for adding durable storage later. Old standalone component test fixtures still exercise legacy storage behavior, but that behavior is bypassed by the routed application. Starting projects never restores global sketch or circuit values.
 
@@ -109,35 +109,33 @@ Choose **LCD · Hello Piko**, then Start simulation. The 16×2 character display
 The worker decodes falling enable edges in HD44780 4-bit mode. This first version supports printable ASCII, two DDRAM rows, clear/home, setCursor, display/noDisplay and entry direction. Custom characters, cursor visuals, display scrolling, readback/busy polling, 8-bit mode and I²C backpacks are outside this milestone. It does not model contrast voltage, backlight current, or electrical timing violations. Setup installs LiquidCrystal 1.0.7 alongside the AVR core.
 
 
-### Learn by building
+### Project articles
 
-The four Markdown guides live in `src/learning/content/*.md`. Each second-level heading is a step, paired with a check definition in `src/learning/lessons.ts`. Guided projects start with the appropriate circuit and sketch. The Blink project begins with one missing jumper. Checks validate real circuit connectivity and simulated timings; the button check observes pressed/on and released/off behavior; the LCD check verifies signal mapping and displayed text. Read/reflection steps are self-reported and stay in the current open guide. Cross-session progress is deferred.
+The four Markdown articles live in `src/learning/content/*.md`. Each second-level heading becomes an anchored section in one continuous article. Projects open with matching, working code and wiring. There are no reading checkmarks, progress persistence, numbered gates or Next buttons. Articles explain the circuit and code, then suggest concrete experiments with expected outcomes. The button article separates input voltage, the internal pull-up, and the LED output branch.
 
-Desktop instructions remain visible while switching between Code and Inspect. Narrow screens use separate views to leave room for the circuit or code. The tools panel has a keyboard-accessible resize separator on desktop. Opening an example inside a guide is undoable; starting another project from the catalog creates a separate bench.
+Guides, code and Inspect can remain visible together on desktop. The guide’s **Restore example code** asks before replacing the sketch, stops execution and preserves wiring. Circuit changes use Undo. Opening a project from the catalog creates a separate session bench.
 
 ### Brand
 
 Piko's circuit-inspired P mark and wordmark are in `public/piko-mark.svg` and `public/piko-logo.svg`. The matching SVG favicon is `public/favicon.svg`. The repository folder and package are named `piko`.
 
 
-### Coding tasks and step resets
-
-Guided LCD benches start with a TODO in setup() instead of a finished greeting. The learner adds lcd.print(), runs the program, then changes the message in the next step. Checks read the executed first LCD row and reject stale compiled code. Each coding task exposes **Reset step code**: it stops execution and restores that task’s scaffold, preserving wiring. The custom-label task resets to the completed greeting, while the first-print task resets to the TODO. The working-example entry still opens the complete sketch.
+### Code editor
 
 The code editor has no example dropdown or unrelated code-only restore action. Project examples are chosen from the catalog and open separate benches with matching circuits and code. Code folding is enabled using the gutter arrows, with bracket matching and auto-closing brackets. This remains a C++ editor; a visual block-programming editor is a separate future feature. The code pane starts at 440 px and resizes up to 720 px, subject to available space. Parts and inspection are contextual canvas panels.
 
 
 ## Simulator-first rebuild
 
-The featured **Build a button counter** project combines an Uno, two named pushbuttons and a 16×2 LCD. D8 is ADD and D9 is RESET. Both are INPUT_PULLUP contacts returning through the breadboard ground rail. Edge detection counts once per press; holding ADD does not keep counting. RESET sets count to zero. The guide follows the complete circuit, highlights relevant pins/nets and checks executed LCD output plus recorded input transitions. Real contact bounce remains outside the digital model.
+The featured **Build a button counter** project combines an Uno, two named pushbuttons and a 16×2 LCD. D8 is ADD and D9 is RESET. Both are INPUT_PULLUP contacts returning through the breadboard ground rail. Edge detection counts once per press; holding ADD does not keep counting. RESET sets count to zero. The article explains the circuit, falling-edge detection and experiments with counting by two and initial values. Real contact bounce remains outside the digital model.
 
 `src/circuit/components.ts` is the shared definition registry for component identities, pin geometry, sizes, instance limits and simulation driver kinds. Rendering and runtime stay separate. The existing, tested editor circuit representation is retained behind an adapter; `src/projects/format.ts` exposes a uniform parts-and-connections diagram for portable projects. This is an incremental foundation change, not a replacement of the firmware emulator or an analog solver.
 
-Use **Download** to export `.piko.json`, then **Open a .piko.json project** on Home to import it as a separate session bench. Format version 1 contains a name, Uno board configuration, `sketch.ino`, a structured `diagram.json` and a validated library manifest. It currently supports one sketch, one Uno, at most one LCD and breadboard, and the existing digital parts. Unknown boards, unsupported libraries/files, invalid pins and oversized input are rejected. Imported projects never overwrite an open bench.
+Use **Project → Export project** to export `.piko.json`, then **Open a .piko.json project** on Home to import it as a separate session bench. Format version 1 contains a name, Uno board configuration, `sketch.ino`, a structured `diagram.json` and a validated library manifest. It currently supports one sketch, one Uno, at most one LCD and breadboard, and the existing digital parts. Unknown boards, unsupported libraries/files, invalid pins and oversized input are rejected. Imported projects never overwrite an open bench.
 
 Sign-in, cloud persistence and sharing are deferred. The session repository remains the integration boundary for a future backend. File tabs expose editable C++ and a read-only live circuit document. Guides, code and circuit can be visible together on desktop; smaller screens expose them as separate views.
 
 
 ### Visual direction
 
-Application chrome uses a dark Poimandres-inspired palette: midnight surfaces, mint primary actions, and pink/purple highlights. The code editor uses a matching syntax theme with translucent active-line highlighting so text selection remains visible. Hardware keeps recognizable physical colors. The guide owns detailed instructions; the canvas only exposes names, controls and actionable feedback. Palette reference: https://github.com/drcmda/poimandres-theme
+The header theme toggle switches between a light slate/teal/violet palette and a dark Poimandres-inspired palette: midnight surfaces, mint primary actions, and pink/purple highlights. The code editor uses a matching syntax theme with translucent active-line highlighting so text selection remains visible. The shared CSS tokens cover shadcn controls, surfaces, canvas grid, wire colours and CodeMirror syntax/selection. The choice stays in React state across navigation and resets to dark on reload; no localStorage is used. Hardware keeps recognizable physical colors. The guide owns detailed instructions; the canvas only exposes names, controls and actionable feedback. Palette reference: https://github.com/drcmda/poimandres-theme

@@ -11,7 +11,7 @@ it("starts each bench independently and stores circuit and sketch as a single se
     b = createProject("lcd", false);
   expect(a.id).not.toBe(b.id);
   expect(a.lessonId).toBe("blink");
-  expect(a.circuit.wires).toHaveLength(2);
+  expect(a.circuit.wires).toHaveLength(3);
   expect(b.circuit.lcd).toBeTruthy();
   const previous = structuredClone(b);
   a.name = "My timing experiment";
@@ -25,7 +25,7 @@ it("starts each bench independently and stores circuit and sketch as a single se
   });
   expect(getProject(b.id)).toEqual(previous);
   const again = createProject("blink", true);
-  expect(again.circuit.wires).toHaveLength(2);
+  expect(again.circuit.wires).toHaveLength(3);
   expect(again.sketch).toContain("delay(500)");
 });
 it("does not expose mutable stored state, handles missing sessions, and rejects invalid updates", () => {

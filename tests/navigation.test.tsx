@@ -48,35 +48,48 @@ afterEach(async () => {
   host.remove();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  document.documentElement.classList.add("dark");
+  delete document.documentElement.dataset.theme;
 });
-it("takes a visitor from Home through a project introduction into a fresh guided bench", async () => {
+it("takes a visitor from Home through a project introduction into a fresh bench with a project article", async () => {
   localStorage.setItem(
     "piko.sketch.v1",
     '{"version":1,"sketch":"invalid old sketch"}',
   );
   await mount();
   expect(host.querySelector("h1")?.textContent).toContain("Build a circuit");
+  const savedBefore = localStorage.getItem("piko.sketch.v1");
+  await click("Dark mode");
+  expect(document.documentElement.dataset.theme).toBe("light");
+  expect(document.documentElement.classList.contains("dark")).toBe(false);
+  expect(localStorage.getItem("piko.sketch.v1")).toBe(savedBefore);
   expect(host.querySelector(".breadboard-canvas")).toBeNull();
   await act(async () =>
     router.navigate({ to: "/learn/$lessonId", params: { lessonId: "blink" } }),
   );
   expect(router.state.location.pathname).toBe("/learn/blink");
   expect(host.querySelector("h1")?.textContent).toBe("Your first blinking LED");
-  await click("Start building");
+  await click("Open bench & guide");
   await act(async () => vi.dynamicImportSettled());
   const id = router.state.location.pathname.split("/").at(-1)!;
-  expect(getProject(id)?.circuit.wires).toHaveLength(2);
+  expect(getProject(id)?.circuit.wires).toHaveLength(3);
   expect(getProject(id)?.sketch).toContain("delay(500)");
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
+  expect(document.documentElement.dataset.theme).toBe("light");
+  expect(host.querySelector('[aria-label="Dark mode"]')?.getAttribute("aria-checked")).toBe("false");
+  await click("Dark mode");
+  expect(document.documentElement.dataset.theme).toBe("dark");
+  expect(document.documentElement.classList.contains("dark")).toBe(true);
+  expect(getProject(id)?.sketch).toContain("delay(500)");
+  expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
   await click("Inspect");
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
+  expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Circuit inspector"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Arduino sketch"]')).toBeTruthy();
   await click("Code");
   expect(host.querySelector('[aria-label="Arduino sketch"]')).toBeNull();
   await click("Code");
   await act(async () => vi.dynamicImportSettled());
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
+  expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Arduino sketch"]')).toBeTruthy();
   await click("Back to Home");
   expect(host.textContent).toContain("Your open benches");
@@ -85,7 +98,7 @@ it("takes a visitor from Home through a project introduction into a fresh guided
     router.navigate({ to: "/bench/$projectId", params: { projectId: id } }),
   );
   expect(host.querySelector(".breadboard-canvas")).toBeTruthy();
-  expect(getProject(id)?.circuit.wires).toHaveLength(2);
+  expect(getProject(id)?.circuit.wires).toHaveLength(3);
 });
 it("opens a working LCD with no saved browser state and explains a missing session", async () => {
   const read = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
@@ -135,13 +148,9 @@ it("opens an imported counter in a new bench with code, circuit and guide availa
   expect(id).not.toBe(source.id);
   expect(getProject(id)?.circuit).toEqual(source.circuit);
   expect(host.querySelector('[aria-label="Arduino sketch"]')).toBeTruthy();
-  expect(host.querySelector('[aria-label="Learning guide"]')).toBeTruthy();
-  await click("Find D8");
-  expect(
-    host
-      .querySelector('[data-terminal="uno:D8"]')
-      ?.getAttribute("aria-description"),
-  ).toBe("Highlighted by guide");
+  expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
+  expect(host.querySelector(".lesson-markdown")?.textContent).toContain("D8");
+  expect(host.querySelectorAll(".article-section")).toHaveLength(4);
   await click("diagram.json");
   expect(
     host.querySelector('[aria-label="Circuit document"]')?.textContent,

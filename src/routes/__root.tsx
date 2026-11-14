@@ -4,6 +4,7 @@ import {
   Scripts,
   createRootRoute,
 } from "@tanstack/react-router";
+import { ThemeProvider } from "../components/theme-toggle";
 import type { ReactNode } from "react";
 import "../styles.css";
 import "../theme.css";
@@ -35,7 +36,7 @@ export const Route = createRootRoute({
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
         <Scripts />
       </body>
     </html>

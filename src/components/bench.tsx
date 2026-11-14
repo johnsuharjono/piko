@@ -25,6 +25,7 @@ import {
   Terminal,
   X,
 } from "lucide-react";
+import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
 import { Link } from "@tanstack/react-router";
 import { ToolResize } from "./tool-resize";
@@ -380,22 +381,18 @@ export function Bench({
             className="preset-picker"
           />
         )}
-        <Button
-          variant="ghost"
-          aria-label="Download project"
-          title="Download code, circuit and configuration"
-          onClick={() =>
-            downloadProject({
-              name: projectName.trim() || "Untitled bench",
-              circuit: circuit.doc,
-              sketch,
-              lessonId,
-            })
-          }
-        >
-          <Download size={16} />
-          <span className="download-label">Download</span>
-        </Button>
+        <details className="project-menu">
+          <summary aria-label="Project menu">Project</summary>
+          <div className="project-menu-content">
+            <Button variant="ghost" aria-label="Export project" onClick={(event) => {
+              downloadProject({ name: projectName.trim() || "Untitled bench", circuit: circuit.doc, sketch, lessonId });
+              event.currentTarget.closest("details")?.removeAttribute("open");
+            }}>
+              <Download size={15} /> Export project
+            </Button>
+            <small>Code and circuit · .piko.json</small>
+          </div>
+        </details>
         <span className="save-status">
           <Check size={13} />
           {project
@@ -406,6 +403,7 @@ export function Bench({
               ? "All changes saved"
               : "Saving…"}
         </span>
+        <ThemeToggle />
         <Button
           variant="ghost"
           size="icon"
@@ -420,7 +418,7 @@ export function Bench({
         <Button
           variant={guideOpen ? "secondary" : "ghost"}
           aria-pressed={guideOpen}
-          aria-label="Learn"
+          aria-label="Project guide"
           aria-controls="learning-sidebar"
           onClick={() => {
             setGuideOpen(!guideOpen);
@@ -428,7 +426,7 @@ export function Bench({
               setTool(null);
           }}
         >
-          <BookOpen size={15} /> Learn
+          <BookOpen size={15} /> Guide
         </Button>
         <div className="toolbar-spacer" />
         <Button
@@ -498,13 +496,10 @@ export function Bench({
           }
         >
           <LearningGuide
-            onHighlight={setHighlight}
             initialLessonId={lessonId}
-            persistProgress={!project}
             open={guideOpen}
             onClose={() => setGuideOpen(false)}
             onStart={startLesson}
-            onExample={loadPreset}
             onResetCode={(code) => {
               stopSimulation();
               editSketch(code);
@@ -513,11 +508,6 @@ export function Bench({
               hideGuideOnNarrowScreen();
               setCodeOpen(true);
             }}
-            doc={circuit.doc}
-            snapshot={snapshot}
-            running={status === "running"}
-            sketch={sketch}
-            compiledSource={bench.compiledSource}
           />
         </Suspense>
         {codeOpen && (
