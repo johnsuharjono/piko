@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/dist
+**/.output
+**/.tanstack
+**/.wrangler
+.arduino
+**/.env*
+**/.dev.vars*
+coverage
+tests

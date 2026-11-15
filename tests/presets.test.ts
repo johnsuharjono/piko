@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
-import { PRESETS } from "../src/circuit/presets";
-import { analyzeCircuit, parseCircuit, COLORS } from "../src/circuit/model";
+import { PRESETS } from "../apps/web/src/circuit/presets";
+import { analyzeCircuit, parseCircuit, COLORS } from "../apps/web/src/circuit/model";
 for (const preset of PRESETS)
   it(`${preset.label} has valid, persistent circuit data and supported wiring`, () => {
     const doc = preset.create(),

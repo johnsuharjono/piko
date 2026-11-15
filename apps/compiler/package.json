@@ -1,0 +1,18 @@
+{
+  "name": "@piko/compiler",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/index.ts",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node24 --format=esm --outfile=dist/index.mjs",
+    "start": "node --env-file-if-exists=.env dist/index.mjs"
+  },
+  "dependencies": {
+    "effect": "4.1.2",
+    "@piko/compile-contract": "workspace:*"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

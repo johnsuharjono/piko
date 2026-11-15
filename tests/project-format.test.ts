@@ -1,17 +1,17 @@
 import { expect, it } from "vitest";
-import { PRESETS } from "../src/circuit/presets";
+import { PRESETS } from "../apps/web/src/circuit/presets";
 import {
   toDiagram,
   fromDiagram,
   encodeProject,
   decodeProject,
-} from "../src/projects/format";
+} from "../apps/web/src/projects/format";
 import {
   createProject,
   importProject,
   getProject,
-} from "../src/projects/store";
-import { COMPONENTS } from "../src/circuit/components";
+} from "../apps/web/src/projects/store";
+import { COMPONENTS } from "../apps/web/src/circuit/components";
 it("round-trips every supported component and working circuit through the portable format", () => {
   for (const preset of PRESETS) {
     const doc = preset.create();

@@ -1,0 +1,6 @@
+{$COMPILER_DOMAIN} {
+    request_body {
+        max_size 40KB
+    }
+    reverse_proxy 127.0.0.1:3001
+}

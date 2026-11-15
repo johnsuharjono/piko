@@ -1,0 +1,24 @@
+services:
+  compiler:
+    image: ${COMPILER_IMAGE:?Set COMPILER_IMAGE to your built image tag}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      COMPILER_TOKEN: ${COMPILER_TOKEN:?Set a random token of at least 32 characters}
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp:size=192m,mode=1777
+    mem_limit: 512m
+    cpus: 1
+    pids_limit: 64
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"

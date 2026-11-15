@@ -2,13 +2,13 @@
 import { act, useCallback, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
-import { Circuit } from "../src/components/circuit";
-import { useCircuit, CIRCUIT_KEY } from "../src/circuit/use-circuit";
-import { analyzeCircuit, holeId, partPosition } from "../src/circuit/model";
-import { fitView, DEFAULT_VIEWPORT } from "../src/circuit/viewport";
-import { starterCircuit, parseCircuit } from "../src/circuit/model";
-import { PRESETS } from "../src/circuit/presets";
-import { INITIAL } from "../src/simulation/machine";
+import { Circuit } from "../apps/web/src/components/circuit";
+import { useCircuit } from "../apps/web/src/circuit/use-circuit";
+import { analyzeCircuit, holeId, partPosition } from "../apps/web/src/circuit/model";
+import { fitView, DEFAULT_VIEWPORT } from "../apps/web/src/circuit/viewport";
+import { starterCircuit, parseCircuit } from "../apps/web/src/circuit/model";
+import { PRESETS } from "../apps/web/src/circuit/presets";
+import { INITIAL } from "../apps/web/src/simulation/machine";
 let state: ReturnType<typeof useCircuit>, root: Root, host: HTMLDivElement;
 const stopped = vi.fn();
 let lockEditing: (locked: boolean) => void;
@@ -152,7 +152,7 @@ it("adds components, plugs them into breadboard holes with keyboard movement, an
   expect(moved.mounts[0]).toBe(holeId("BB1", "D", 9));
   expect(moved.mounts[1]).toBe(holeId("BB1", "D", 10));
 });
-it("connects using shadcn selects and persists the circuit across a remount", async () => {
+it("connects using shadcn selects and starts fresh across a remount", async () => {
   await click(button("Add wire…"));
   const choose = async (label: string, text: string) => {
     const trigger = host.querySelector(`[aria-label="${label}"]`)!;
@@ -178,17 +178,13 @@ it("connects using shadcn selects and persists the circuit across a remount", as
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 250));
   });
-  expect(JSON.parse(localStorage.getItem(CIRCUIT_KEY)!).wires).toHaveLength(4);
+  expect(state.doc.wires).toHaveLength(4);
+  expect(analyzeCircuit(state.doc).connected(holeId("BB1", "TP", 1), holeId("BB1", "TP", 30))).toBe(true);
+  expect(localStorage.length).toBe(0);
   await act(async () => root.unmount());
   host.remove();
   await mount();
-  expect(state.doc.wires).toHaveLength(4);
-  expect(
-    analyzeCircuit(state.doc).connected(
-      holeId("BB1", "TP", 1),
-      holeId("BB1", "TP", 30),
-    ),
-  ).toBe(true);
+  expect(state.doc).toEqual(starterCircuit());
 });
 it("cancels a partial wire with Escape and clears/restores the bench without losing undo", async () => {
   await click(terminal("uno:D12"));

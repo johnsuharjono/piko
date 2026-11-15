@@ -3,10 +3,10 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
-import { getRouter } from "../src/router";
-import { encodeProject } from "../src/projects/format";
-import { createProject, getProject } from "../src/projects/store";
-vi.mock("../src/components/code-editor", () => ({
+import { getRouter } from "../apps/web/src/router";
+import { encodeProject } from "../apps/web/src/projects/format";
+import { createProject, getProject } from "../apps/web/src/projects/store";
+vi.mock("../apps/web/src/components/code-editor", () => ({
   default: ({ value, language }: { value: string; language?: string }) => (
     <textarea
       aria-label={language === "json" ? "Circuit document" : "Arduino sketch"}

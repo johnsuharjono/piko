@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
-import { starterCircuit } from "../src/circuit/model";
-import { fitView, resizedView, zoomView } from "../src/circuit/viewport";
+import { starterCircuit } from "../apps/web/src/circuit/model";
+import { fitView, resizedView, zoomView } from "../apps/web/src/circuit/viewport";
 
 it("keeps components at native CSS size on a 4K workbench", () => {
   const size = { width: 3616, height: 2017 };

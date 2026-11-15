@@ -10,8 +10,8 @@ import {
   starterCircuit,
   type CircuitDoc,
   type Part,
-} from "../src/circuit/model";
-import { INITIAL } from "../src/simulation/machine";
+} from "../apps/web/src/circuit/model";
+import { INITIAL } from "../apps/web/src/simulation/machine";
 const h = (row: Parameters<typeof holeId>[1], col: number) =>
   holeId("BB1", row, col);
 const wire = (id: string, from: string, to: string) => ({

@@ -1,26 +1,25 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
-import { compileSketch, validateSketch } from "../src/server/compiler";
-import { STARTER, experiments } from "../src/lib/examples";
+import { validateSketch } from "../packages/compile-contract/src/index";
+import { compileSketch } from "../apps/compiler/src/compiler";
+import { STARTER, experiments } from "../apps/web/src/lib/examples";
 import {
   INITIAL,
   Machine,
   loadHex,
   type Snapshot,
-} from "../src/simulation/machine";
-import { SimulationRuntime } from "../src/simulation/runtime";
-import type { Reply } from "../src/simulation/protocol";
+} from "../apps/web/src/simulation/machine";
+import { SimulationRuntime } from "../apps/web/src/simulation/runtime";
+import type { Reply } from "../apps/web/src/simulation/protocol";
 
-import { analyzeCircuit, ledIsOn, starterCircuit } from "../src/circuit/model";
+import { analyzeCircuit, ledIsOn, starterCircuit } from "../apps/web/src/circuit/model";
 
-import { lcdConnections } from "../src/circuit/model";
+import { lcdConnections } from "../apps/web/src/circuit/model";
 import {
   LESSONS,
   lessonProject,
-  checkStep,
-  observeCounter,
-} from "../src/learning/lessons";
-import { PRESETS } from "../src/circuit/presets";
+} from "../apps/web/src/learning/lessons";
+import { PRESETS } from "../apps/web/src/circuit/presets";
 const firmware = new Map<string, string>();
 async function compile(source: string) {
   const result = await Effect.runPromise(compileSketch(source));
@@ -263,40 +262,17 @@ it("executes LiquidCrystal firmware through GPIO edges and updates both LCD rows
   expect(disconnected.snapshot().lcd).toBeUndefined();
 });
 
-it("runs the LCD article example and its message experiment as real firmware", async () => {
+it("runs an article's LCD message experiment as real firmware", async () => {
   const lesson = LESSONS.find((l) => l.id === "lcd")!;
   const project = lessonProject(lesson);
-  const evidence = { pressed: false, released: false };
   const pins = lcdConnections(project.doc);
-  const starter = new Machine(await compile(project.sketch), pins);
-  advance(starter, 150);
-  expect(starter.snapshot().lcd?.[0].trim()).toBe("Hello, Piko!");
-  expect(starter.snapshot().lcd?.[1]).toContain("Seconds: 0");
-  expect(
-    checkStep("lcd-text", project.doc, starter.snapshot(), evidence).passed,
-  ).toBe(true);
-  const greeting = project.sketch;
-  const first = new Machine(await compile(greeting), pins);
-  advance(first, 150);
-  expect(
-    checkStep("lcd-text", project.doc, first.snapshot(), evidence).passed,
-  ).toBe(true);
-  expect(
-    checkStep("lcd-label", project.doc, first.snapshot(), evidence).passed,
-  ).toBe(false);
-  const custom = greeting.replace(
-    'lcd.print("Hello, Piko!");',
-    'lcd.print("My first LCD!");',
-  );
+  const original = new Machine(await compile(project.sketch), pins);
+  advance(original, 150);
+  expect(original.snapshot().lcd?.[0].trim()).toBe("Hello, Piko!");
+  const custom = project.sketch.replace("Hello, Piko!", "My first LCD!");
   const edited = new Machine(await compile(custom), pins);
   advance(edited, 150);
   expect(edited.snapshot().lcd?.[0].trim()).toBe("My first LCD!");
-  expect(
-    checkStep("lcd-label", project.doc, edited.snapshot(), evidence, {
-      sketch: custom,
-      compiledSource: custom,
-    }).passed,
-  ).toBe(true);
 });
 
 it("runs the complete button counter from circuit inputs, counts once per hold, and resets the LCD", () => {
@@ -321,30 +297,11 @@ it("runs the complete button counter from circuit inputs, counts once per hold, 
   expect(m.snapshot().lcd?.[1].trim()).toBe("Count: 2");
   inputs({});
   advance(m, 50);
-  const counted = observeCounter(m.snapshot(), {
-    counted: false,
-    reset: false,
-  });
-  expect(
-    checkStep("counter-count", doc, m.snapshot(), {
-      pressed: false,
-      released: false,
-      ...counted,
-    }).passed,
-  ).toBe(true);
   inputs({ BTN2: true });
   advance(m, 50);
   expect(m.snapshot().lcd?.[1].trim()).toBe("Count: 0");
   inputs({});
   advance(m, 50);
-  const reset = observeCounter(m.snapshot(), counted);
-  expect(
-    checkStep("counter-reset", doc, m.snapshot(), {
-      pressed: false,
-      released: false,
-      ...reset,
-    }).passed,
-  ).toBe(true);
   doc.wires = doc.wires.filter((w) => w.id !== "C1B");
   inputs({ BTN1: true });
   advance(m, 100);

@@ -2,10 +2,10 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { useBench } from "../src/simulation/use-bench";
-import { INITIAL } from "../src/simulation/machine";
-import { STARTER } from "../src/lib/examples";
-import type { Reply } from "../src/simulation/protocol";
+import { useBench } from "../apps/web/src/simulation/use-bench";
+import { INITIAL } from "../apps/web/src/simulation/machine";
+import { STARTER } from "../apps/web/src/lib/examples";
+import type { Reply } from "../apps/web/src/simulation/protocol";
 
 let bench: ReturnType<typeof useBench>;
 let root: Root;

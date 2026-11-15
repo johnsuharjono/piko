@@ -2,15 +2,13 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
-import { PRESETS } from "../src/circuit/presets";
-import { CIRCUIT_KEY } from "../src/circuit/use-circuit";
-import { starterCircuit } from "../src/circuit/model";
-import { STARTER } from "../src/lib/examples";
-import { Bench } from "../src/components/bench";
+import { PRESETS } from "../apps/web/src/circuit/presets";
+import { STARTER } from "../apps/web/src/lib/examples";
+import { Bench } from "../apps/web/src/components/bench";
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to, ...props }: any) => <a href={to} {...props}>{children}</a>,
 }));
-vi.mock("../src/components/code-editor", () => ({
+vi.mock("../apps/web/src/components/code-editor", () => ({
   default: ({ value, language }: { value: string; language?: string }) => (
     <textarea
       aria-label={language === "json" ? "Circuit document" : "Arduino sketch"}
@@ -121,7 +119,7 @@ it("loads a complete preset and can undo both its circuit and sketch", async () 
   ).toContain("const int LED_PIN = 13");
 });
 
-it("restores matching Blink wiring and code, persists them, and can undo both", async () => {
+it("restores matching Blink wiring and code in session, and can undo both", async () => {
   await choose("Bench preset", "Button light");
   await click(button("Restore Blink"));
   expect(host.querySelectorAll(".circuit-part")).toHaveLength(2);
@@ -135,39 +133,22 @@ it("restores matching Blink wiring and code, persists them, and can undo both", 
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 350));
   });
-  expect(JSON.parse(localStorage.getItem("piko.sketch.v1")!).sketch).toBe(
-    STARTER,
-  );
-  expect(JSON.parse(localStorage.getItem(CIRCUIT_KEY)!)).toEqual(
-    starterCircuit(),
-  );
+  expect(localStorage.length).toBe(0);
   await click(button("Undo preset"));
   expect(sketch()).toBe(PRESETS.find((p) => p.id === "button")!.sketch);
   expect(host.querySelector('[aria-label="Press BTN1"]')).toBeTruthy();
 });
 
-it("repairs previously saved input code paired with restored Blink wiring", async () => {
+it("ignores old browser storage and always opens a fresh standalone bench", async () => {
   await act(async () => root.unmount());
-  localStorage.setItem(CIRCUIT_KEY, JSON.stringify(starterCircuit()));
-  localStorage.setItem(
-    "piko.sketch.v1",
-    JSON.stringify({
-      version: 1,
-      sketch: PRESETS.find((p) => p.id === "button")!.sketch,
-    }),
-  );
+  localStorage.setItem("piko.sketch.v1", JSON.stringify({ version: 1, sketch: "invalid old code" }));
+  localStorage.setItem("piko.circuit.v1", "invalid old circuit");
   root = createRoot(host);
   await act(async () => root.render(<Bench />));
-  await click(button("Restore Blink"));
   await click(button("Code"));
   await act(async () => vi.dynamicImportSettled());
-  expect(
-    (host.querySelector('[aria-label="Arduino sketch"]') as HTMLTextAreaElement)
-      .value,
-  ).toBe(STARTER);
-  expect(
-    host.querySelector('[aria-label="Bench preset"]')?.textContent,
-  ).toContain("Blink");
+  expect((host.querySelector('[aria-label="Arduino sketch"]') as HTMLTextAreaElement).value).toBe(STARTER);
+  expect(host.querySelectorAll(".circuit-part")).toHaveLength(2);
 });
 
 it("loads the LCD preset with matching sketch and restores the prior bench", async () => {
@@ -209,7 +190,7 @@ it("opens a continuous project article without completion gates or saved reading
   expect(host.textContent).not.toContain("Check my bench");
   expect(host.textContent).not.toContain("Mark as read");
   expect(localStorage.getItem("piko.learning.v1")).toBeNull();
-  expect(JSON.parse(localStorage.getItem(CIRCUIT_KEY)!).wires).toHaveLength(3);
+  expect(host.querySelectorAll(".editable-wire")).toHaveLength(3);
   await click(button("Inspect"));
   expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Circuit inspector"]')).toBeTruthy();
@@ -224,7 +205,7 @@ it("restores an article's example code only after confirmation and preserves wir
   await click(button("Open LCD project"));
   await click(button("Open code"));
   await act(async () => vi.dynamicImportSettled());
-  const before = localStorage.getItem(CIRCUIT_KEY);
+  const before = host.querySelectorAll(".editable-wire").length;
   const code = () => (host.querySelector('[aria-label="Arduino sketch"]') as HTMLTextAreaElement).value;
   expect(code()).toContain('lcd.print("Hello, Piko!");');
   await click(button("Restore example code"));
@@ -234,7 +215,7 @@ it("restores an article's example code only after confirmation and preserves wir
   await click(button("Restore example code"));
   await click(button("Replace code"));
   expect(code()).toContain('lcd.print("Hello, Piko!");');
-  expect(localStorage.getItem(CIRCUIT_KEY)).toBe(before);
+  expect(host.querySelectorAll(".editable-wire")).toHaveLength(before);
   expect(host.textContent).toContain("Example code restored");
 });
 

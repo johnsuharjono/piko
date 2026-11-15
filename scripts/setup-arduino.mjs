@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 
-const root = resolve(".arduino");
+const root = resolve(process.env.ARDUINO_HOME || ".arduino");
 const bin = join(root, "bin");
 await mkdir(bin, { recursive: true });
 const platform = { darwin: "macOS", linux: "Linux" }[process.platform];
