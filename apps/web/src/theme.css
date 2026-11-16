@@ -505,7 +505,72 @@ input:focus-visible {
 }
 
 .theme-toggle { flex-shrink: 0; color: var(--muted); }
-.site-header > .theme-toggle { margin-left: 12px; }
 .primary-link:hover { background: var(--primary-hover); }
 .project-divider, .nav-divider { background: var(--border); }
 .trace-svg line, .trace-svg > path:not([fill="none"]) { stroke: var(--border); }
+
+/* Keep navigation and workspace actions in separate, predictable groups. */
+.site-header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+.site-header-actions .theme-toggle {
+  color: var(--foreground);
+  background: var(--surface);
+}
+.bench-header {
+  gap: 12px;
+  padding-inline: 16px;
+}
+.bench-header .project-divider { margin-inline: 4px; }
+.bench-header .project-name {
+  width: clamp(160px, 28vw, 340px);
+  max-width: 340px;
+  min-width: 0;
+  height: 32px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 6px;
+  text-overflow: ellipsis;
+}
+.bench-header .project-name:focus-visible {
+  border-color: var(--primary);
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.learning-panel .panel-header > span {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--foreground);
+}
+.learning-body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: normal;
+  padding: 20px 24px 32px;
+}
+.lesson-markdown {
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+.lesson-markdown p, .lesson-markdown li { max-width: 58ch; }
+.lesson-markdown code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.86em;
+}
+.lesson-markdown pre { max-width: 100%; }
+@media (max-width: 700px) {
+  .site-header { gap: 16px; }
+  .site-header nav { gap: 14px; }
+  .bench-header { gap: 6px; padding-inline: 10px; }
+  .bench-header .project-name { flex: 1; width: 0; }
+  .learning-body { padding-inline: 20px; }
+}
+
+.learning-scroll-area { flex: 1; min-height: 0; overflow: hidden; }
+.learning-scroll-area [data-slot="scroll-area-viewport"] { overscroll-behavior: contain; }
+.learning-scroll-area .learning-body { overflow: visible; }

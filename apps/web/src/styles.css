@@ -2390,11 +2390,6 @@ button:disabled {
 .article-section h3 { color: var(--bright); font-size: 17px; line-height: 1.4; font-weight: 600; }
 .article-reset { padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; line-height: 1.6; }
 .article-reset p { margin-bottom: 10px; }
-.project-menu { position: relative; font-size: 12px; }
-.project-menu > summary { cursor: pointer; padding: 8px 12px; border-radius: 5px; color: var(--muted); }
-.project-menu > summary:focus-visible { outline: 2px solid var(--primary); }
-.project-menu-content { position: absolute; top: 36px; left: 0; width: 215px; padding: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; z-index: 30; box-shadow: 0 8px 24px #0005; }
-.project-menu-content small { display: block; padding: 4px 10px; color: var(--muted); font-size: 11px; }
 .circuit-builder[data-external-tray="true"] .builder-inspector { top: 64px; bottom: auto; }
 .circuit-builder .builder-inspector.selection-toolbar { top: 60px; bottom: auto; left: 14px; right: auto; width: auto; max-width: calc(100% - 28px); display: flex; align-items: center; gap: 12px; padding: 6px 10px; }
 .selection-toolbar .properties-header { margin: 0; }

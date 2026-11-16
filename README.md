@@ -64,7 +64,7 @@ Home opens a playground or project article. Articles are ordinary Markdown in `a
 
 Open projects live in an in-memory session repository. Navigation preserves work; reload starts fresh. The app never reads or writes localStorage. Use **Project → Export project** to keep code and wiring together as `.piko.json`, then reopen the file from Home. Imported files are validated and create a separate bench. No cloud saving or sign-in is implemented.
 
-The header switches between Poimandres-inspired dark and slate/teal light themes. Appearance also stays in memory for the session.
+The header theme menu offers Light, Dark, and System. Dark uses the Poimandres-inspired palette; light uses slate/teal. System follows OS appearance changes. The choice stays in memory for the session.
 
 ## Circuit model
 

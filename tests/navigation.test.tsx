@@ -1,9 +1,17 @@
 // @vitest-environment jsdom
-import { act } from "react";
+import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { getRouter } from "../apps/web/src/router";
+import { Route as rootRoute } from "../apps/web/src/routes/__root";
+import { ThemeProvider } from "../apps/web/src/components/theme-toggle";
+// The document shell belongs to SSR; client navigation tests mount in a div.
+Object.assign(rootRoute.options, {
+  shellComponent: ({ children }: { children: ReactNode }) => (
+    <ThemeProvider>{children}</ThemeProvider>
+  ),
+});
 import { encodeProject } from "../apps/web/src/projects/format";
 import { createProject, getProject } from "../apps/web/src/projects/store";
 vi.mock("../apps/web/src/components/code-editor", () => ({
@@ -23,7 +31,9 @@ async function mount(path = "/") {
   await act(async () => root.render(<RouterProvider router={router} />));
 }
 async function click(text: string) {
-  const el = Array.from(host.querySelectorAll("a,button")).find(
+  const el = Array.from(
+    document.querySelectorAll('a,button,[role="menuitemradio"]'),
+  ).find(
     (e) =>
       e.getAttribute("aria-label") === text || e.textContent?.trim() === text,
   );
@@ -59,7 +69,8 @@ it("takes a visitor from Home through a project introduction into a fresh bench 
   await mount();
   expect(host.querySelector("h1")?.textContent).toContain("Build a circuit");
   const savedBefore = localStorage.getItem("piko.sketch.v1");
-  await click("Dark mode");
+  await click("Change theme");
+  await click("Light");
   expect(document.documentElement.dataset.theme).toBe("light");
   expect(document.documentElement.classList.contains("dark")).toBe(false);
   expect(localStorage.getItem("piko.sketch.v1")).toBe(savedBefore);
@@ -75,8 +86,12 @@ it("takes a visitor from Home through a project introduction into a fresh bench 
   expect(getProject(id)?.circuit.wires).toHaveLength(3);
   expect(getProject(id)?.sketch).toContain("delay(500)");
   expect(document.documentElement.dataset.theme).toBe("light");
-  expect(host.querySelector('[aria-label="Dark mode"]')?.getAttribute("aria-checked")).toBe("false");
-  await click("Dark mode");
+  await click("Change theme");
+  expect(
+    document.querySelector('[role="menuitemradio"][aria-checked="true"]')
+      ?.textContent,
+  ).toBe("Light");
+  await click("Dark");
   expect(document.documentElement.dataset.theme).toBe("dark");
   expect(document.documentElement.classList.contains("dark")).toBe(true);
   expect(getProject(id)?.sketch).toContain("delay(500)");

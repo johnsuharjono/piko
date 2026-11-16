@@ -12,6 +12,7 @@ import {
   Activity,
   ArrowDownToLine,
   Download,
+  Ellipsis,
   BookOpen,
   Check,
   CircuitBoard,
@@ -25,6 +26,7 @@ import {
   Terminal,
   X,
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
 import { Link } from "@tanstack/react-router";
@@ -274,7 +276,7 @@ export function Bench({
         : "Start simulation";
   return (
     <div className="workbench">
-      <header className="topbar">
+      <header className="topbar bench-header">
         {project ? (
           <Link to="/" className="bench-home" aria-label="Back to Home">
             <Brand compact />
@@ -317,22 +319,18 @@ export function Bench({
             className="preset-picker"
           />
         )}
-        <details className="project-menu">
-          <summary aria-label="Project menu">Project</summary>
-          <div className="project-menu-content">
-            <Button variant="ghost" aria-label="Export project" onClick={(event) => {
-              downloadProject({ name: projectName.trim() || "Untitled bench", circuit: circuit.doc, sketch, lessonId });
-              event.currentTarget.closest("details")?.removeAttribute("open");
-            }}>
-              <Download size={15} /> Export project
-            </Button>
-            <small>Code and circuit · .piko.json</small>
-          </div>
-        </details>
         <span className="save-status">
           <Check size={13} />
           {saved ? "Kept in this session" : "Not saved"}
         </span>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Project actions" title="Project actions" />}><Ellipsis size={17} /></DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => downloadProject({ name: projectName.trim() || "Untitled bench", circuit: circuit.doc, sketch, lessonId })}>
+              <Download /> Export project
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <ThemeToggle />
         <Button
           variant="ghost"

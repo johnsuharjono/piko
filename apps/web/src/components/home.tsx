@@ -27,7 +27,9 @@ export function SiteHeader() {
           Explore projects
         </Link>
       </nav>
-      <ThemeToggle />
+      <div className="site-header-actions">
+        <ThemeToggle />
+      </div>
     </header>
   );
 }
@@ -224,15 +226,8 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
                 </button>
               ))}
             </div>
-            <p className="hero-note">
-              Each example opens a fresh bench with matching code and wiring.
-              Your open benches stay intact.
-            </p>
           </section>
         )}
-        <footer className="site-footer">
-          <span>Benches last for this session. Export a project to keep it.</span>
-        </footer>
       </main>
     </div>
   );
