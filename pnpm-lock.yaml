@@ -75,6 +75,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.5
         version: 1.2.5
+      '@piko/browser-compiler':
+        specifier: workspace:*
+        version: link:../../packages/browser-compiler
       '@piko/compile-contract':
         specifier: workspace:*
         version: link:../../packages/compile-contract
@@ -142,6 +145,16 @@ importers:
       wrangler:
         specifier: 4.162.0
         version: 4.162.0(@types/node@26.6.6)
+
+  packages/browser-compiler:
+    dependencies:
+      '@piko/compile-contract':
+        specifier: workspace:*
+        version: link:../compile-contract
+    devDependencies:
+      '@horang-corp/avr-gcc-wasm':
+        specifier: 0.2.0
+        version: 0.2.0
 
   packages/compile-contract: {}
 
@@ -539,6 +552,10 @@ packages:
 
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@horang-corp/avr-gcc-wasm@0.2.0':
+    resolution: {integrity: sha512-N7evT4c8E/9sIKVk0VbC8V+i9UTubHgY5Frxh6LB+OR8BytXmU1cE20poIY0ndj7FwqUPzy1SQfBOAWUDNyU4A==}
+    engines: {node: '>=18'}
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2594,6 +2611,8 @@ snapshots:
       react-dom: 19.3.1(react@19.3.1)
 
   '@floating-ui/utils@0.2.12': {}
+
+  '@horang-corp/avr-gcc-wasm@0.2.0': {}
 
   '@img/colour@1.1.0': {}
 

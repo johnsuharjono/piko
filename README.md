@@ -8,6 +8,7 @@ A small electronics playground: connect a circuit, edit real Arduino C++, and ru
 apps/web/                   TanStack Start, React, SVG circuits, CodeMirror, Markdown guides
 apps/compiler/              Node HTTP service and Effect-managed Arduino compilation
 packages/compile-contract/  Request limits, validation and response types
+packages/browser-compiler/  Opt-in WASM compiler worker and independent Uno build driver
 scripts/                    Local development and toolchain setup
 tests/                      Integration and simulation checks
 .github/workflows/          Checks and an optional compiler-image build
@@ -28,6 +29,10 @@ pnpm dev
 Open http://127.0.0.1:3000. The compiler listens on loopback port 3001. The first `pnpm dev` generates `apps/web/.dev.vars` containing a random local service token; it is ignored by Git. Starting development does not deploy to Cloudflare. Stop with Ctrl+C to stop both services.
 
 Arduino CLI 1.5.1, Arduino AVR core 1.8.8 and LiquidCrystal 1.0.7 are installed in the ignored root `.arduino/` directory. On Apple Silicon, setup prepares native ARM tools; Homebrew is needed for their shared libraries. Linux uses the Arduino-distributed toolchain. The Docker image installs Linux tools during its build; it does not copy your Mac binaries.
+
+## Browser compiler experiment
+
+Run `pnpm dev:wasm` for frontend-only development with real AVR compilation in a browser worker. Run `pnpm test:wasm` for firmware behavior checks and `pnpm build:wasm` for the optional build. The default production path remains unchanged. See [scope, commands and distribution prerequisites](docs/browser-compiler.md).
 
 ## Checks and builds
 

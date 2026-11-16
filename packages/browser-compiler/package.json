@@ -1,0 +1,9 @@
+{
+  "name": "@piko/browser-compiler",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": { ".": "./src/client.ts", "./engine": "./src/engine.ts" },
+  "dependencies": { "@piko/compile-contract": "workspace:*" },
+  "devDependencies": { "@horang-corp/avr-gcc-wasm": "0.2.0" }
+}

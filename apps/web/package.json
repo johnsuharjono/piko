@@ -18,7 +18,8 @@
     "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",
     "tailwind-merge": "^3.7.0",
-    "@piko/compile-contract": "workspace:*"
+    "@piko/compile-contract": "workspace:*",
+    "@piko/browser-compiler": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
@@ -38,6 +39,8 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 3000",
     "deploy": "pnpm build && wrangler deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:wasm": "vite --mode wasm --host 127.0.0.1 --port 3000",
+    "build:wasm": "vite build --mode wasm"
   }
 }

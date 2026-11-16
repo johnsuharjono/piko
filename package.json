@@ -17,7 +17,11 @@
     "test": "vitest run",
     "test:unit": "vitest run --exclude tests/firmware.test.ts",
     "deploy:web": "pnpm --filter @piko/web deploy",
-    "check:compiler-image": "node scripts/check-compiler-image.mjs"
+    "check:compiler-image": "node scripts/check-compiler-image.mjs",
+    "prepare:wasm": "node scripts/prepare-browser-compiler.mjs",
+    "dev:wasm": "pnpm prepare:wasm && pnpm --filter @piko/web dev:wasm",
+    "build:wasm": "pnpm prepare:wasm && pnpm --filter @piko/web build:wasm",
+    "test:wasm": "pnpm prepare:wasm && PIKO_TEST_COMPILER=browser vitest run tests/firmware.test.ts tests/browser-compiler.test.ts"
   },
   "devDependencies": {
     "@types/jsdom": "^30.0.0",

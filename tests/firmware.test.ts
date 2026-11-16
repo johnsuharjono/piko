@@ -2,6 +2,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
 import { validateSketch } from "../packages/compile-contract/src/index";
 import { compileSketch } from "../apps/compiler/src/compiler";
+import { compileBrowserSketch } from "./browser-toolchain";
 import { STARTER, experiments } from "../apps/web/src/lib/examples";
 import {
   INITIAL,
@@ -12,17 +13,23 @@ import {
 import { SimulationRuntime } from "../apps/web/src/simulation/runtime";
 import type { Reply } from "../apps/web/src/simulation/protocol";
 
-import { analyzeCircuit, ledIsOn, starterCircuit } from "../apps/web/src/circuit/model";
+import {
+  analyzeCircuit,
+  ledIsOn,
+  starterCircuit,
+} from "../apps/web/src/circuit/model";
 
 import { lcdConnections } from "../apps/web/src/circuit/model";
-import {
-  LESSONS,
-  lessonProject,
-} from "../apps/web/src/learning/lessons";
+import { LESSONS, lessonProject } from "../apps/web/src/learning/lessons";
 import { PRESETS } from "../apps/web/src/circuit/presets";
+const compileResult = (source: string) =>
+  process.env.PIKO_TEST_COMPILER === "browser"
+    ? compileBrowserSketch(source)
+    : Effect.runPromise(compileSketch(source));
+
 const firmware = new Map<string, string>();
 async function compile(source: string) {
-  const result = await Effect.runPromise(compileSketch(source));
+  const result = await compileResult(source);
   if (!result.ok) throw new Error(result.message);
   return result.hex;
 }
@@ -118,10 +125,8 @@ describe("real compiled Arduino Uno firmware", () => {
     expect(() => loadHex(":0100000000FF\n:00000001FE")).toThrow("checksum");
   });
   it("returns actual line-specific compiler errors", async () => {
-    const result = await Effect.runPromise(
-      compileSketch(
-        "void setup() {\n  this_is_not_valid();\n}\nvoid loop() {}",
-      ),
+    const result = await compileResult(
+      "void setup() {\n  this_is_not_valid();\n}\nvoid loop() {}",
     );
     expect(result.ok).toBe(false);
     if (!result.ok) {

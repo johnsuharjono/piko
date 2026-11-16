@@ -4,7 +4,16 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { fileURLToPath } from "node:url";
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  publicDir:
+    mode === "wasm" || process.env.VITE_COMPILER === "browser"
+      ? ".wasm-public"
+      : "public",
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  plugins: [tailwindcss(), cloudflare({ viteEnvironment: { name: "ssr" } }), tanstackStart(), react()],
-});
+  plugins: [
+    tailwindcss(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
+    tanstackStart(),
+    react(),
+  ],
+}));

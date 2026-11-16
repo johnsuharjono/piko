@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { INITIAL, type Snapshot, type DigitalInputs } from "./machine";
 import type { Command, Reply } from "./protocol";
-import { isCompileResult } from "@piko/compile-contract";
+import { compileSketch } from "../compiler";
 export type Status = "idle" | "compiling" | "running" | "paused" | "error";
 export function useBench() {
   const [snapshot, setSnapshot] = useState<Snapshot>(INITIAL);
@@ -50,14 +50,9 @@ export function useBench() {
       setStatus("compiling");
       setMessage("Compiling your sketch for Arduino Uno…");
       try {
-        const response = await fetch("/api/compile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sketch: source }),
-          signal: controller.signal,
+        const result = await compileSketch(source, controller.signal, phase => {
+          if (generation.current === id) setMessage(phase);
         });
-        const result: unknown = await response.json();
-        if (!isCompileResult(result)) throw new Error("Invalid compiler response.");
         if (generation.current !== id) return;
         if (!result.ok) {
           setStatus("error");
@@ -102,7 +97,7 @@ export function useBench() {
         if (generation.current !== id || controller.signal.aborted) return;
         setStatus("error");
         setMessage(
-          `Could not reach the compiler service. Try again in a moment.\n${error instanceof Error ? error.message : ""}`,
+          `Compilation could not finish.\n${error instanceof Error ? error.message : "Press Run to retry."}`,
         );
       }
     },
