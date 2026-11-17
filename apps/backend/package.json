@@ -1,0 +1,19 @@
+{
+  "name": "@piko/backend",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": "./convex/_generated/api.js"
+  },
+  "scripts": {
+    "dev": "convex dev",
+    "check": "convex dev --once",
+    "deploy": "convex deploy"
+  },
+  "dependencies": {
+    "convex": "^1.50.0",
+    "@convex-dev/better-auth": "0.13.0",
+    "better-auth": "~1.7.16",
+    "@piko/project-model": "workspace:*"
+  }
+}

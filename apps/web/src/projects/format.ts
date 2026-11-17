@@ -144,7 +144,9 @@ export function encodeProject(
   };
   return JSON.stringify(file, null, 2);
 }
-export function decodeProject(text: string): Omit<Project, "id" | "updatedAt"> {
+export function decodeProject(
+  text: string,
+): Pick<Project, "name" | "sketch" | "circuit" | "lessonId"> {
   if (text.length > 200000)
     throw new Error("Project files must be smaller than 200 KB.");
   let file: ProjectFile;

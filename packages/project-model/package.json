@@ -1,0 +1,1 @@
+{"name":"@piko/project-model","private":true,"version":"0.1.0","type":"module","exports":{".":"./src/index.ts","./circuit":"./src/circuit.ts","./components":"./src/components.ts"}}

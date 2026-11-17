@@ -30,6 +30,7 @@ function Harness() {
 const compiled = { ok: true, hex: ":00000001FF", output: "Compiled." };
 
 beforeEach(async () => {
+  vi.stubEnv("VITE_COMPILER", "native");
   workers.length = 0;
   vi.stubGlobal("Worker", MockWorker);
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
@@ -46,6 +47,7 @@ afterEach(async () => {
   await act(async () => root.unmount());
   host.remove();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 it("connects controls to the worker and fully clears circuit state on reset", async () => {

@@ -1,7 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { LESSONS, guideSections } from "../learning/lessons";
-import { createProject } from "../projects/store";
+import { projectError } from "../projects/errors";
+import { initialContent } from "../projects/store";
+import { useProjects } from "../projects/provider";
 import { SiteHeader } from "./home";
 import { ProjectArt } from "./project-art";
 import { useState } from "react";
@@ -10,6 +12,8 @@ export function ProjectIntro({ id }: { id: string }) {
   const lesson = LESSONS.find((l) => l.id === id);
   const navigate = useNavigate();
   const [error, setError] = useState("");
+  const [opening, setOpening] = useState(false);
+  const projects = useProjects();
   if (!lesson)
     return (
       <div className="site-page">
@@ -22,11 +26,15 @@ export function ProjectIntro({ id }: { id: string }) {
     );
   const index = LESSONS.indexOf(lesson);
   async function start(guided: boolean) {
+    if (opening) return;
+    setOpening(true);
     try {
-      const p = createProject(lesson!.preset, guided);
+      const p = await projects.create(initialContent(lesson!.preset, guided));
       await navigate({ to: "/bench/$projectId", params: { projectId: p.id } });
-    } catch {
-      setError("Could not start this project. Try again.");
+    } catch (error) {
+      setError(projectError(error, "Could not start this project. Try again."));
+    } finally {
+      setOpening(false);
     }
   }
   return (
@@ -49,10 +57,17 @@ export function ProjectIntro({ id }: { id: string }) {
               <span>Project walkthrough</span>
             </div>
             <div className="hero-actions">
-              <Button onClick={() => start(true)}>
+              <Button
+                disabled={opening || projects.status !== "ready"}
+                onClick={() => start(true)}
+              >
                 Open bench & guide <ArrowRight size={16} />
               </Button>
-              <Button variant="outline" onClick={() => start(false)}>
+              <Button
+                disabled={opening || projects.status !== "ready"}
+                variant="outline"
+                onClick={() => start(false)}
+              >
                 Open example only
               </Button>
             </div>

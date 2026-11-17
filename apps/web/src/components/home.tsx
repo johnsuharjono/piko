@@ -1,12 +1,16 @@
 import { readProjectFile } from "../projects/file-io";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, CircuitBoard, Plus, ArrowUpRight } from "lucide-react";
 import { PRESETS } from "../circuit/presets";
 import { LESSONS } from "../learning/lessons";
-import { createProject, listProjects, type Project } from "../projects/store";
+import { initialContent } from "../projects/store";
+import { projectError } from "../projects/errors";
+import { useProjects } from "../projects/provider";
+import { projectContent } from "@piko/project-model";
+import { AccountMenu } from "./account-menu";
 import { ProjectArt } from "./project-art";
 import { Button } from "./ui/button";
 export function SiteHeader() {
@@ -28,6 +32,7 @@ export function SiteHeader() {
         </Link>
       </nav>
       <div className="site-header-actions">
+        <AccountMenu />
         <ThemeToggle />
       </div>
     </header>
@@ -60,19 +65,28 @@ export function ProjectCards() {
   );
 }
 export function Home({ catalog = false }: { catalog?: boolean }) {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const repository = useProjects();
+  const projects = repository.projects || [];
+  const [opening, setOpening] = useState(false);
+  const [deleting, setDeleting] = useState<{
+    id: string;
+    revision: number;
+  } | null>(null);
   const navigate = useNavigate();
   const fileInput = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
-  useEffect(() => {
-    setProjects(listProjects());
-  }, []);
   async function newBench(presetId = "empty") {
+    if (opening) return;
+    setOpening(true);
     try {
-      const p = createProject(presetId);
+      const p = await repository.create(initialContent(presetId));
       await navigate({ to: "/bench/$projectId", params: { projectId: p.id } });
-    } catch {
-      setError("Could not open a bench. Please try again.");
+    } catch (error) {
+      setError(
+        projectError(error, "Could not open a bench. Please try again."),
+      );
+    } finally {
+      setOpening(false);
     }
   }
   return (
@@ -109,7 +123,11 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
               >
                 Make an LED blink <ArrowRight size={16} />
               </Link>
-              <Button variant="outline" onClick={() => newBench()}>
+              <Button
+                disabled={opening || repository.status !== "ready"}
+                variant="outline"
+                onClick={() => newBench()}
+              >
                 <Plus size={16} /> Open an empty bench
               </Button>
             </div>
@@ -123,8 +141,10 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
                 onChange={async (e) => {
                   const file = e.target.files?.[0];
                   if (!file) return;
+                  setOpening(true);
                   try {
-                    const imported = await readProjectFile(file);
+                    const content = await readProjectFile(file);
+                    const imported = await repository.create(content);
                     await navigate({
                       to: "/bench/$projectId",
                       params: { projectId: imported.id },
@@ -137,10 +157,14 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
                     );
                   } finally {
                     e.target.value = "";
+                    setOpening(false);
                   }
                 }}
               />
-              <button onClick={() => fileInput.current?.click()}>
+              <button
+                disabled={opening || repository.status !== "ready"}
+                onClick={() => fileInput.current?.click()}
+              >
                 Open a .piko.json project
               </button>
             </div>
@@ -151,34 +175,113 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
             </div>
           )}
         </section>
-        {error && <p role="alert">{error}</p>}
+        {(error || repository.error) && (
+          <div className="project-alert" role="alert">
+            <span>{error || repository.error}</span>
+            {repository.status === "error" && (
+              <Button size="sm" onClick={repository.retry}>
+                Reconnect
+              </Button>
+            )}
+          </div>
+        )}
         {!catalog && projects.length > 0 && (
           <section className="recent-projects">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">PICK UP WHERE YOU LEFT OFF</span>
-                <h2>Your open benches</h2>
+                <span className="eyebrow">YOUR WORKSPACE</span>
+                <h2>Your projects</h2>
               </div>
-              <span>Kept for this session</span>
             </div>
             <div className="recent-grid">
               {projects.map((p) => (
-                <Link
-                  to="/bench/$projectId"
-                  params={{ projectId: p.id }}
-                  key={p.id}
-                  className="recent-card"
-                >
-                  <CircuitBoard size={24} />
-                  <span>
-                    <strong>{p.name}</strong>
-                    <small>
-                      {p.lessonId ? "Project + guide" : "Playground"} · Open
-                      workspace
-                    </small>
-                  </span>
-                  <ArrowRight size={17} />
-                </Link>
+                <article className="saved-project" key={p.id}>
+                  <Link
+                    to="/bench/$projectId"
+                    params={{ projectId: p.id }}
+                    className="recent-card"
+                  >
+                    <CircuitBoard size={24} />
+                    <span>
+                      <strong>{p.name}</strong>
+                      <small>
+                        {p.lessonId ? "Project + guide" : "Playground"}
+                      </small>
+                    </span>
+                    <ArrowRight size={17} />
+                  </Link>
+                  <div className="project-card-actions">
+                    {deleting?.id === p.id ? (
+                      <>
+                        <span>Delete this project?</span>
+                        <Button
+                          size="xs"
+                          variant="destructive"
+                          onClick={async () => {
+                            try {
+                              await repository.remove({
+                                ...p,
+                                revision: deleting!.revision,
+                              });
+                              setDeleting(null);
+                            } catch (e) {
+                              setError(
+                                e instanceof Error
+                                  ? e.message
+                                  : "Could not delete project.",
+                              );
+                            }
+                          }}
+                        >
+                          Delete
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="ghost"
+                          onClick={() => setDeleting(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="xs"
+                          variant="ghost"
+                          onClick={async () => {
+                            try {
+                              const source = await repository.open(p.id);
+                              if (!source) return;
+                              const copy = await repository.create(
+                                projectContent({
+                                  ...source.getSnapshot().project,
+                                  name: `${p.name.slice(0, 70)} (copy)`,
+                                }),
+                              );
+                              await navigate({
+                                to: "/bench/$projectId",
+                                params: { projectId: copy.id },
+                              });
+                            } catch {
+                              setError("Could not duplicate project.");
+                            }
+                          }}
+                        >
+                          Duplicate
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="ghost"
+                          onClick={() =>
+                            setDeleting({ id: p.id, revision: p.revision })
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </article>
               ))}
             </div>
           </section>
@@ -213,6 +316,7 @@ export function Home({ catalog = false }: { catalog?: boolean }) {
               ).map((p) => (
                 <button
                   className="recent-card example-card"
+                  disabled={opening || repository.status !== "ready"}
                   key={p.id}
                   aria-label={`Open ${p.label} example`}
                   onClick={() => newBench(p.id)}

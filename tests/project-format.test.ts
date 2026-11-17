@@ -6,11 +6,7 @@ import {
   encodeProject,
   decodeProject,
 } from "../apps/web/src/projects/format";
-import {
-  createProject,
-  importProject,
-  getProject,
-} from "../apps/web/src/projects/store";
+import { createProject, importProject, getProject } from "./project-repository";
 import { COMPONENTS } from "../apps/web/src/circuit/components";
 it("round-trips every supported component and working circuit through the portable format", () => {
   for (const preset of PRESETS) {

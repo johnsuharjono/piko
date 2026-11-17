@@ -574,3 +574,16 @@ input:focus-visible {
 .learning-scroll-area { flex: 1; min-height: 0; overflow: hidden; }
 .learning-scroll-area [data-slot="scroll-area-viewport"] { overscroll-behavior: contain; }
 .learning-scroll-area .learning-body { overflow: visible; }
+.workspace-shell { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.workspace-shell .workbench { height: auto; min-height: 0; flex: 1; }
+.project-alert { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); color: var(--foreground); font-size: 12px; }
+.project-alert > span { flex: 1; min-width: 180px; }
+.save-status[data-phase="error"], .save-status[data-phase="conflict"], .save-status[data-phase="missing"], .account-error { color: var(--pink); }
+.site-header-actions { gap: 8px; }
+.account-connecting { color: var(--muted); font-size: 12px; }
+.account-menu { max-width: min(280px, calc(100vw - 24px)); }
+.account-note { padding: 6px 8px; font-size: 12px; line-height: 1.5; color: var(--muted); }
+.saved-project { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.saved-project .recent-card { border: 0; border-radius: 0; }
+.project-card-actions { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 6px 10px; border-top: 1px solid var(--border); font-size: 12px; }
+@media(max-width:700px) { .account-trigger > span { display: none; } .bench-header .account-trigger { padding-inline: 6px; } }

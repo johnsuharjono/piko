@@ -1,3 +1,5 @@
+> The default app now compiles in the browser and stores projects in Convex. Start with [the current project deployment guide](projects.md#deployment). The native compiler service below is an optional alternative; it is not required for normal Cloudflare deployment.
+
 # Deployment preparation
 
 The prepared topology is a Cloudflare-hosted website plus a compiler service on a VPS. Authentication, persistent projects, and user quotas can be added later. No live resources have been created by this refactor.

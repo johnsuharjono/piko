@@ -49,3 +49,20 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:wasm
       - run: pnpm --filter @piko/web build:wasm
+  deploy-backend:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [verify, browser-firmware, firmware]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @piko/backend exec convex deploy --yes
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}

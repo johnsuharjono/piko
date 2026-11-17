@@ -26,13 +26,20 @@ import {
   Terminal,
   X,
 } from "lucide-react";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { Brand } from "./brand";
+import { AccountMenu } from "./account-menu";
 import { Link } from "@tanstack/react-router";
 import { ToolResize } from "./tool-resize";
 import { downloadProject, toDiagram } from "../projects/format";
 import type { Project } from "../projects/store";
+import { useProjectDocument } from "../projects/use-document";
 import { Button } from "./ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import { Circuit, type ComponentName } from "./circuit";
@@ -42,7 +49,6 @@ import { useCircuit } from "../circuit/use-circuit";
 import { analyzeCircuit, ledIsOn, lcdConnections } from "../circuit/model";
 import { PRESETS } from "../circuit/presets";
 import type { CircuitDoc } from "../circuit/model";
-import { STARTER } from "../lib/examples";
 import { useBench } from "../simulation/use-bench";
 import { lessonProject, type Lesson } from "../learning/lessons";
 const LearningGuide = lazy(() => import("./learning-guide"));
@@ -76,11 +82,27 @@ const explanations: Record<ComponentName, { title: string; text: string }> = {
 
 export function Bench({
   project,
-  onProjectSave,
-}: { project?: Project; onProjectSave?: (project: Project) => unknown } = {}) {
-  const [sketch, setSketch] = useState(project?.sketch || STARTER);
-  const [saved, setSaved] = useState(true);
-  const [storageWarning, setStorageWarning] = useState("");
+  onProjectChange,
+  saveLabel = "Unsaved bench",
+  savePhase = "pending",
+}: {
+  project?: Project;
+  onProjectChange?: (project: Project) => void;
+  saveLabel?: string;
+  savePhase?: string;
+} = {}) {
+  const { document: projectDocument, updateDocument } = useProjectDocument(
+    project,
+    onProjectChange,
+  );
+  const { sketch, name: projectName, lessonId } = projectDocument;
+  const setSketch = useCallback(
+    (sketch: string) => updateDocument({ sketch }),
+    [updateDocument],
+  );
+  const setProjectName = (name: string) => updateDocument({ name });
+  const setLessonId = (lessonId: string | undefined) =>
+    updateDocument({ lessonId });
   const [selected, setSelected] = useState(13);
   const [component, setComponent] = useState<ComponentName>("board");
   type Tool = "components" | "inspect" | "help";
@@ -108,8 +130,6 @@ export function Bench({
     setToolView("help", value);
   const selectedComponent = useCallback(() => setTool(null), []);
   const [trayTarget, setTrayTarget] = useState<HTMLDivElement | null>(null);
-  const [lessonId, setLessonId] = useState(project?.lessonId);
-  const [projectName, setProjectName] = useState(project?.name || "Your bench");
   const [guideOpen, setGuideOpen] = useState(!!project?.lessonId);
   const [controls, setControls] = useState<Record<string, boolean>>({});
   const [preset, setPreset] = useState("custom");
@@ -127,7 +147,14 @@ export function Bench({
     setPreset("custom");
     setCircuitEdited(true);
   }, [bench.reset]);
-  const circuit = useCircuit(onCircuitEdit, project?.circuit);
+  const circuit = useCircuit(
+    onCircuitEdit,
+    projectDocument.circuit,
+    useCallback(
+      (circuit: CircuitDoc) => updateDocument({ circuit }),
+      [updateDocument],
+    ),
+  );
   const analysis = useMemo(
     () => analyzeCircuit(circuit.doc, controls),
     [circuit.doc, controls],
@@ -168,21 +195,13 @@ export function Bench({
   };
   const dirty =
     bench.compiledSource !== null && bench.compiledSource !== sketch;
-  useEffect(() => {
-    if (!project || !onProjectSave) return;
-    try {
-      onProjectSave({ ...project, name: projectName.trim() || "Untitled bench", lessonId, circuit: circuit.doc, sketch });
-      setSaved(true);
-      setStorageWarning("");
-    } catch {
-      setSaved(false);
-      setStorageWarning("Could not keep this bench in the session. Export the project before leaving.");
-    }
-  }, [sketch, circuit.doc, projectName, lessonId, project, onProjectSave]);
-  const editSketch = useCallback((value: string) => {
-    setSketch(value);
-    setPreset("custom");
-  }, []);
+  const editSketch = useCallback(
+    (value: string) => {
+      setSketch(value);
+      setPreset("custom");
+    },
+    [setSketch],
+  );
   const exportSketch = () => {
     const url = URL.createObjectURL(new Blob([sketch], { type: "text/plain" }));
     const link = document.createElement("a");
@@ -319,18 +338,43 @@ export function Bench({
             className="preset-picker"
           />
         )}
-        <span className="save-status">
-          <Check size={13} />
-          {saved ? "Kept in this session" : "Not saved"}
+        <span className="save-status" role="status" data-phase={savePhase}>
+          {savePhase === "saving" ? (
+            <LoaderCircle size={13} className="spin" />
+          ) : savePhase === "saved" ? (
+            <Check size={13} />
+          ) : null}
+          {saveLabel}
         </span>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" aria-label="Project actions" title="Project actions" />}><Ellipsis size={17} /></DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Project actions"
+                title="Project actions"
+              />
+            }
+          >
+            <Ellipsis size={17} />
+          </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => downloadProject({ name: projectName.trim() || "Untitled bench", circuit: circuit.doc, sketch, lessonId })}>
+            <DropdownMenuItem
+              onClick={() =>
+                downloadProject({
+                  name: projectName.trim() || "Untitled bench",
+                  circuit: circuit.doc,
+                  sketch,
+                  lessonId,
+                })
+              }
+            >
               <Download /> Export project
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        <AccountMenu />
         <ThemeToggle />
         <Button
           variant="ghost"
@@ -474,22 +518,22 @@ export function Bench({
               ))}
             </div>
             <div className="editor-container">
-                <Suspense
-                  fallback={<p className="editor-loading">Loading editor…</p>}
-                >
-                  <CodeEditor
-                    value={
-                      file === "sketch.ino"
-                        ? sketch
-                        : JSON.stringify(toDiagram(circuit.doc), null, 2)
-                    }
-                    onChange={
-                      file === "sketch.ino" ? editSketch : ignoreDiagramEdit
-                    }
-                    readOnly={file === "diagram.json"}
-                    language={file === "diagram.json" ? "json" : "cpp"}
-                  />
-                </Suspense>
+              <Suspense
+                fallback={<p className="editor-loading">Loading editor…</p>}
+              >
+                <CodeEditor
+                  value={
+                    file === "sketch.ino"
+                      ? sketch
+                      : JSON.stringify(toDiagram(circuit.doc), null, 2)
+                  }
+                  onChange={
+                    file === "sketch.ino" ? editSketch : ignoreDiagramEdit
+                  }
+                  readOnly={file === "diagram.json"}
+                  language={file === "diagram.json" ? "json" : "cpp"}
+                />
+              </Suspense>
             </div>
             <div className="editor-footer">
               <span>
@@ -497,7 +541,7 @@ export function Bench({
                   ? "Circuit document · read only"
                   : dirty
                     ? "Edited · stop and run to apply"
-                    : saved ? "Kept in this session" : "Not saved"}
+                    : saveLabel}
               </span>
               <Button
                 variant="ghost"
@@ -787,7 +831,6 @@ export function Bench({
               <pre className={status === "error" ? "message-error" : ""}>
                 {bench.message}
               </pre>
-              {storageWarning && <p>{storageWarning}</p>}
             </TabsContent>
             <TabsContent value="serial">
               <pre>{snapshot.serial || "No serial output yet."}</pre>

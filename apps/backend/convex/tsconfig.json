@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ESNext","lib":["ESNext","DOM"],"module":"ESNext","moduleResolution":"Bundler","strict":true,"skipLibCheck":true,"noEmit":true,"allowJs":true,"isolatedModules":true},"include":["./**/*"],"exclude":["./_generated"]}

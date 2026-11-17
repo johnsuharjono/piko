@@ -15,6 +15,7 @@ import { Route as ApiCompileRouteImport } from './routes/api.compile'
 import { Route as BenchProjectIdRouteImport } from './routes/bench.$projectId'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as LearnLessonIdRouteImport } from './routes/learn.$lessonId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +47,11 @@ const LearnLessonIdRoute = LearnLessonIdRouteImport.update({
   path: '/$lessonId',
   getParentRoute: () => LearnRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/bench/$projectId': typeof BenchProjectIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
   '/learn/': typeof LearnIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/bench/$projectId': typeof BenchProjectIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
   '/learn': typeof LearnIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/bench/$projectId': typeof BenchProjectIdRoute
   '/learn/$lessonId': typeof LearnLessonIdRoute
   '/learn/': typeof LearnIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,8 +89,15 @@ export interface FileRouteTypes {
     | '/bench/$projectId'
     | '/learn/$lessonId'
     | '/learn/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/compile' | '/bench/$projectId' | '/learn/$lessonId' | '/learn'
+  to:
+    | '/'
+    | '/api/compile'
+    | '/bench/$projectId'
+    | '/learn/$lessonId'
+    | '/learn'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -90,6 +106,7 @@ export interface FileRouteTypes {
     | '/bench/$projectId'
     | '/learn/$lessonId'
     | '/learn/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,6 +114,7 @@ export interface RootRouteChildren {
   LearnRoute: typeof LearnRouteWithChildren
   ApiCompileRoute: typeof ApiCompileRoute
   BenchProjectIdRoute: typeof BenchProjectIdRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -143,6 +161,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnLessonIdRouteImport
       parentRoute: typeof LearnRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -163,6 +188,7 @@ const rootRouteChildren: RootRouteChildren = {
   LearnRoute: LearnRouteWithChildren,
   ApiCompileRoute: ApiCompileRoute,
   BenchProjectIdRoute: BenchProjectIdRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

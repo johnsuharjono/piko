@@ -5,15 +5,21 @@ import { createMemoryHistory, RouterProvider } from "@tanstack/react-router";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { getRouter } from "../apps/web/src/router";
 import { Route as rootRoute } from "../apps/web/src/routes/__root";
+import { ProjectsContext } from "../apps/web/src/projects/provider";
+import { testProjects } from "./project-repository";
 import { ThemeProvider } from "../apps/web/src/components/theme-toggle";
 // The document shell belongs to SSR; client navigation tests mount in a div.
 Object.assign(rootRoute.options, {
   shellComponent: ({ children }: { children: ReactNode }) => (
-    <ThemeProvider>{children}</ThemeProvider>
+    <ThemeProvider>
+      <ProjectsContext.Provider value={testProjects}>
+        {children}
+      </ProjectsContext.Provider>
+    </ThemeProvider>
   ),
 });
 import { encodeProject } from "../apps/web/src/projects/format";
-import { createProject, getProject } from "../apps/web/src/projects/store";
+import { createProject, getProject } from "./project-repository";
 vi.mock("../apps/web/src/components/code-editor", () => ({
   default: ({ value, language }: { value: string; language?: string }) => (
     <textarea
@@ -107,7 +113,7 @@ it("takes a visitor from Home through a project introduction into a fresh bench 
   expect(host.querySelector('[aria-label="Project guide"]')).toBeTruthy();
   expect(host.querySelector('[aria-label="Arduino sketch"]')).toBeTruthy();
   await click("Back to Home");
-  expect(host.textContent).toContain("Your open benches");
+  expect(host.textContent).toContain("Your projects");
   expect(host.querySelector(`a[href="/bench/${id}"]`)).toBeTruthy();
   await act(async () =>
     router.navigate({ to: "/bench/$projectId", params: { projectId: id } }),
@@ -115,7 +121,7 @@ it("takes a visitor from Home through a project introduction into a fresh bench 
   expect(host.querySelector(".breadboard-canvas")).toBeTruthy();
   expect(getProject(id)?.circuit.wires).toHaveLength(3);
 });
-it("opens a working LCD with no saved browser state and explains a missing session", async () => {
+it("opens a working LCD with no saved browser state and handles an inaccessible project", async () => {
   const read = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
     throw new Error("storage blocked");
   });
@@ -128,7 +134,7 @@ it("opens a working LCD with no saved browser state and explains a missing sessi
   await mount(`/bench/${project.id}`);
   await act(async () => vi.dynamicImportSettled());
   expect(host.querySelector('[aria-label^="16 by 2 LCD:"]')).toBeTruthy();
-  expect(host.textContent).toContain("Kept in this session");
+  expect(host.textContent).toContain("Saved");
   expect(read).not.toHaveBeenCalled();
   expect(write).not.toHaveBeenCalled();
   await act(async () =>
@@ -137,7 +143,7 @@ it("opens a working LCD with no saved browser state and explains a missing sessi
       params: { projectId: "expired" },
     }),
   );
-  expect(host.textContent).toContain("This bench is no longer open");
+  expect(host.textContent).toContain("Project not found");
   expect(host.querySelector(".breadboard-canvas")).toBeNull();
 });
 

@@ -4,7 +4,7 @@ import {
   getProject,
   listProjects,
   saveProject,
-} from "../apps/web/src/projects/store";
+} from "./project-repository";
 it("starts each bench independently and stores circuit and sketch as a single session project", () => {
   const a = createProject("blink", true),
     b = createProject("lcd", false);

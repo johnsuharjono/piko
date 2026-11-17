@@ -11,6 +11,7 @@ RUN corepack enable && corepack prepare pnpm@10.15.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/compiler/package.json apps/compiler/package.json
 COPY packages/compile-contract/package.json packages/compile-contract/package.json
+COPY packages/project-model/package.json packages/project-model/package.json
 RUN pnpm install --frozen-lockfile --filter @piko/compiler...
 COPY apps/compiler/src apps/compiler/src
 COPY packages/compile-contract/src packages/compile-contract/src
