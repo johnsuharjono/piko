@@ -1,16 +1,14 @@
 import { isCompileResult, type CompileResult } from "@piko/compile-contract";
 
 // Backend choice is build-time only; sketches and the simulator share the same
-// result contract. The WASM experiment never silently sends code to a server.
+// result contract. Native compilation requires explicit opt-in; the default
+// production build must never silently send sketches to a server.
 export async function compileSketch(
   sketch: string,
   signal: AbortSignal,
   onProgress: (message: string) => void,
 ): Promise<CompileResult> {
-  if (
-    import.meta.env.MODE === "wasm" ||
-    import.meta.env.VITE_COMPILER === "browser"
-  ) {
+  if (import.meta.env.VITE_COMPILER !== "native") {
     const { compileInBrowser } = await import("@piko/browser-compiler");
     onProgress("Loading browser compiler…");
     const response = await fetch("/compiler/manifest.json", {
