@@ -34,6 +34,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm setup:arduino
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: pnpm exec vitest run tests/firmware.test.ts
   browser-firmware:
     runs-on: ubuntu-latest

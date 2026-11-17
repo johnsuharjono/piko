@@ -14,6 +14,11 @@ if (!platform || !arch)
   );
 const response = await fetch(
   "https://api.github.com/repos/arduino/arduino-cli/releases/tags/v1.5.1",
+  {
+    headers: process.env.GITHUB_TOKEN
+      ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+      : {},
+  },
 );
 if (!response.ok) throw new Error(`Release lookup failed: ${response.status}`);
 const release = await response.json();
